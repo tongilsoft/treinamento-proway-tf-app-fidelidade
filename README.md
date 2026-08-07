@@ -12,8 +12,8 @@ Esse projeto tem como objeto demonstrar os novos conhecimentos adquiridos como p
 
 O codigo desse projeto consta de:
 
-- backend: diretorio onde residem os arquivos para levantar o backend
-- outros: diretorios dos arquivos de codigo fonte da app android
+- backend: diretório onde residem os arquivos para levantar o backend
+- outros: diretórios dos arquivos de codigo fonte da app android
 
 ### Branches
 
