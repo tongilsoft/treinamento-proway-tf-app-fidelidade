@@ -1,4 +1,4 @@
-package com.treinamento.app_fidelidade.view
+package com.treinamento.app_fidelidade.view.Authentication
 
 
 import androidx.compose.animation.core.FastOutSlowInEasing
