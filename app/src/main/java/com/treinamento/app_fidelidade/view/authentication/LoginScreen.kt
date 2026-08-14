@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -19,6 +21,7 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -69,171 +72,204 @@ fun LoginScreen(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        OutlinedTextField(
-            value = email,
-            onValueChange = {
-                email = it
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            placeholder = {
-                Text(
-                    text = "Email",
-                    color = LoginSecondaryTextColor,
-                    fontSize = 15.sp
-                )
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Email,
-                    contentDescription = "E-mail",
-                    tint = LoginSecondaryTextColor
-                )
-            },
-            singleLine = true,
-            shape = RoundedCornerShape(12.dp),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email
-            ),
-            colors = loginTextFieldColors()
-        )
 
-        Spacer(
-            modifier = Modifier.height(10.dp)
-        )
+        if (!viewModel.isLoading) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
 
-        OutlinedTextField(
-            value = password,
-            onValueChange = {
-                password = it
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            placeholder = {
-                Text(
-                    text = "Senha",
-                    color = LoginSecondaryTextColor,
-                    fontSize = 15.sp
+
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = {
+                        email = it
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    placeholder = {
+                        Text(
+                            text = "Email",
+                            color = LoginSecondaryTextColor,
+                            fontSize = 15.sp
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Email,
+                            contentDescription = "E-mail",
+                            tint = LoginSecondaryTextColor
+                        )
+                    },
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email
+                    ),
+                    colors = loginTextFieldColors()
                 )
-            },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Default.Lock,
-                    contentDescription = "Senha",
-                    tint = LoginSecondaryTextColor
+
+                Spacer(
+                    modifier = Modifier.height(10.dp)
                 )
-            },
-            trailingIcon = {
-                IconButton(
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = {
+                        password = it
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    placeholder = {
+                        Text(
+                            text = "Senha",
+                            color = LoginSecondaryTextColor,
+                            fontSize = 15.sp
+                        )
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = "Senha",
+                            tint = LoginSecondaryTextColor
+                        )
+                    },
+                    trailingIcon = {
+                        IconButton(
+                            onClick = {
+                                passwordVisible = !passwordVisible
+                            }
+                        ) {
+                            Icon(
+                                imageVector = if (passwordVisible) {
+                                    Icons.Default.VisibilityOff
+                                } else {
+                                    Icons.Default.Visibility
+                                },
+                                contentDescription = if (passwordVisible) {
+                                    "Ocultar senha"
+                                } else {
+                                    "Exibir senha"
+                                },
+                                tint = LoginSecondaryTextColor
+                            )
+                        }
+                    },
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password
+                    ),
+                    visualTransformation = if (passwordVisible) {
+                        VisualTransformation.None
+                    } else {
+                        PasswordVisualTransformation()
+                    },
+                    colors = loginTextFieldColors()
+                )
+
+                Spacer(
+                    modifier = Modifier.height(34.dp)
+                )
+
+                Button(
                     onClick = {
-                        passwordVisible = !passwordVisible
-                    }
+                        if (email.isBlank()) {
+                            onShowMessage("Informe o e-mail")
+                            return@Button
+                        }
+
+                        if (password.isBlank()) {
+                            onShowMessage("Informe a senha")
+                            return@Button
+                        }
+                        viewModel.doLogin(
+                            UsuarioLogin(email, password)
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    shape = RoundedCornerShape(11.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent
+                    ),
+                    contentPadding = PaddingValues()
                 ) {
-                    Icon(
-                        imageVector = if (passwordVisible) {
-                            Icons.Default.VisibilityOff
-                        } else {
-                            Icons.Default.Visibility
-                        },
-                        contentDescription = if (passwordVisible) {
-                            "Ocultar senha"
-                        } else {
-                            "Exibir senha"
-                        },
-                        tint = LoginSecondaryTextColor
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                color = LoginPrimaryBlue,
+                                shape = RoundedCornerShape(11.dp)
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Entrar",
+                            color = Color.White,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
+                Spacer(
+                    modifier = Modifier.height(20.dp)
+                )
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Ainda não tem conta? ",
+                        color = LoginSecondaryTextColor,
+                        fontSize = 13.sp
+                    )
+
+                    Text(
+                        text = "Cadastre-se",
+                        color = LoginPrimaryBlue,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.clickable(
+                            onClick = {}//onRegisterClick
+                        )
                     )
                 }
-            },
-            singleLine = true,
-            shape = RoundedCornerShape(12.dp),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password
-            ),
-            visualTransformation = if (passwordVisible) {
-                VisualTransformation.None
-            } else {
-                PasswordVisualTransformation()
-            },
-            colors = loginTextFieldColors()
-        )
-
-        Spacer(
-            modifier = Modifier.height(34.dp)
-        )
-
-        Button(
-            onClick = {
-                if (email.isBlank()) {
-                    onShowMessage("Informe o e-mail")
-                    return@Button
-                }
-
-                if (password.isBlank()) {
-                    onShowMessage("Informe a senha")
-                    return@Button
-                }
-
-                viewModel.doLogin(
-                    UsuarioLogin(email, password)
-                )
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(50.dp),
-            shape = RoundedCornerShape(11.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.Transparent
-            ),
-            contentPadding = PaddingValues()
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        color = LoginPrimaryBlue,
-                        shape = RoundedCornerShape(11.dp)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Entrar",
-                    color = Color.White,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold
-                )
             }
-        }
+        } else {
 
-        Spacer(
-            modifier = Modifier.height(20.dp)
-        )
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Ainda não tem conta? ",
-                color = LoginSecondaryTextColor,
-                fontSize = 13.sp
-            )
-
-            Text(
-                text = "Cadastre-se",
-                color = LoginPrimaryBlue,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.clickable(
-                    onClick = {}//onRegisterClick
+                // Loading indicator
+                CircularProgressIndicator(
+                    color = Color.White,
+                    strokeWidth = 5.dp,
+                    modifier = Modifier.size(100.dp)
                 )
-            )
+                Spacer(modifier = Modifier.height(30.dp))
+
+                Text(
+                    text = "Carregando os Dados...",
+                    color = LoginTextColor,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(horizontal = 30.dp)
+                )
+
+            }
         }
     }
 }
 
 @Composable
-private fun loginTextFieldColors() =
+fun loginTextFieldColors() =
     OutlinedTextFieldDefaults.colors(
         focusedTextColor = LoginTextColor,
         unfocusedTextColor = LoginTextColor,
