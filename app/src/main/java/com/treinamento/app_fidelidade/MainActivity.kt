@@ -4,12 +4,10 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.runtime.*
 import com.treinamento.app_fidelidade.ui.theme.App_FidelidadeTheme
 import com.treinamento.app_fidelidade.view.authentication.AuthenticationScreen
+import com.treinamento.app_fidelidade.view.home.HomeScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,24 +15,21 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             App_FidelidadeTheme {
-                AuthenticationScreen()
+//                MainNavigation()
+                HomeScreen()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+fun MainNavigation() {
+    var currentScreen by remember { mutableStateOf("authentication") }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    App_FidelidadeTheme {
-        Greeting("Android")
+    when (currentScreen) {
+        "authentication" -> AuthenticationScreen(
+            onAuthSuccess = { currentScreen = "home" }
+        )
+        "home" -> HomeScreen()
     }
 }

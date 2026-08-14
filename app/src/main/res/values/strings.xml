@@ -24,4 +24,21 @@
     <string name="register_action"> Cadastre-se</string>
     <string name="already_have_account">Já possui uma conta?</string>
     <string name="login_action"> Entrar</string>
+
+    <!-- Home Screen -->
+    <string name="hello_user">Olá, %s! 👋</string>
+    <string name="points_balance">Saldo de pontos</string>
+    <string name="points_label">pontos</string>
+    <string name="offline_warning">Os dados podem estar desatualizados devido estar sem internet.</string>
+    <string name="statement_filter">Filtro do extrato</string>
+    <string name="filter_all">Todos</string>
+    <string name="filter_earnings">Ganhos</string>
+    <string name="filter_spendings">Gastos</string>
+    <string name="points_statement">Extrato de pontos</string>
+    <string name="view_all">Ver todos</string>
+    <string name="offers_title">Ofertas</string>
+    <string name="nearby_partners">Parceiros próximos</string>
+    <string name="unit_km">%s km</string>
+    <string name="resale_label">Resgate - %s</string>
+    <string name="purchase_label">Compra - %s</string>
 </resources>
