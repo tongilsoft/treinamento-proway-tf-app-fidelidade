@@ -1,4 +1,4 @@
-package com.treinamento.app_fidelidade.view.Authentication
+package com.treinamento.app_fidelidade.view.authentication
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height

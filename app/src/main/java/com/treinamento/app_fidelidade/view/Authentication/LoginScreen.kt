@@ -1,4 +1,4 @@
-package com.treinamento.app_fidelidade.view.Authentication
+package com.treinamento.app_fidelidade.view.authentication
 
 
 import androidx.compose.foundation.clickable
@@ -25,12 +25,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.treinamento.app_fidelidade.R
 
 
 private val BackgroundColor = Color(0xFF001427)
@@ -44,7 +46,8 @@ private val SecondaryTextColor = Color(0xFFB7C1CE)
 
 @Composable
 fun LoginScreen(
-    onRegisterClick: () -> Unit
+    onRegisterClick: () -> Unit,
+    onLoginSuccess: () -> Unit
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -57,11 +60,11 @@ fun LoginScreen(
         AuthenticationTextField(
             value = email,
             onValueChange = { email = it },
-            placeholder = "Email",
+            placeholder = stringResource(id = R.string.email_placeholder),
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Email,
-                    contentDescription = "E-mail",
+                    contentDescription = stringResource(id = R.string.email_placeholder),
                     tint = SecondaryTextColor
                 )
             },
@@ -73,11 +76,11 @@ fun LoginScreen(
         AuthenticationTextField(
             value = password,
             onValueChange = { password = it },
-            placeholder = "Senha",
+            placeholder = stringResource(id = R.string.password_placeholder),
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Default.Lock,
-                    contentDescription = "Senha",
+                    contentDescription = stringResource(id = R.string.password_placeholder),
                     tint = SecondaryTextColor
                 )
             },
@@ -94,9 +97,9 @@ fun LoginScreen(
                             Icons.Default.Visibility
                         },
                         contentDescription = if (passwordVisible) {
-                            "Ocultar senha"
+                            stringResource(id = R.string.hide_password)
                         } else {
-                            "Mostrar senha"
+                            stringResource(id = R.string.show_password)
                         },
                         tint = SecondaryTextColor
                     )
@@ -117,7 +120,7 @@ fun LoginScreen(
             modifier = Modifier.align(Alignment.End)
         ) {
             Text(
-                text = "Esqueceu sua senha?",
+                text = stringResource(id = R.string.forgot_password),
                 color = PrimaryBlue,
                 fontSize = 14.sp
             )
@@ -126,10 +129,8 @@ fun LoginScreen(
         Spacer(modifier = Modifier.height(38.dp))
 
         GradientButton(
-            text = "Entrar",
-            onClick = {
-                // TODO: realizar login
-            }
+            text = stringResource(id = R.string.login_button),
+            onClick = onLoginSuccess
         )
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -139,13 +140,13 @@ fun LoginScreen(
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Ainda não tem conta?",
+                text = stringResource(id = R.string.no_account),
                 color = SecondaryTextColor,
                 fontSize = 14.sp
             )
 
             Text(
-                text = " Cadastre-se",
+                text = stringResource(id = R.string.register_action),
                 color = PrimaryBlue,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold,

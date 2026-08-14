@@ -1,4 +1,4 @@
-package com.treinamento.app_fidelidade.view.Authentication
+package com.treinamento.app_fidelidade.view.authentication
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -7,6 +7,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import com.treinamento.app_fidelidade.R
 
 
 private val BackgroundColor = Color(0xFF001427)
@@ -29,9 +31,9 @@ fun PasswordVisibilityButton(
                 Icons.Default.Visibility
             },
             contentDescription = if (passwordVisible) {
-                "Ocultar senha"
+                stringResource(id = R.string.hide_password)
             } else {
-                "Mostrar senha"
+                stringResource(id = R.string.show_password)
             },
             tint = SecondaryTextColor
         )
