@@ -9,7 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.treinamento.app_fidelidade.ui.theme.App_FidelidadeTheme
-import com.treinamento.app_fidelidade.view.Authentication.AuthenticationScreen
+import com.treinamento.app_fidelidade.view.authentication.AuthenticationScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

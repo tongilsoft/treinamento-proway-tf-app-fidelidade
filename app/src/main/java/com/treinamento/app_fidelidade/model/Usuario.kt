@@ -11,6 +11,7 @@ data class Usuario(
     val password: String,
     val pontosSaldo: BigInteger,
     val qrCode: String,
+    val urlImage: String,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
 )
