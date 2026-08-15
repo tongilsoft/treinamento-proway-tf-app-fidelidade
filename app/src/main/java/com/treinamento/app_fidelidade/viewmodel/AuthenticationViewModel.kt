@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.treinamento.app_fidelidade.data.remote.RetrofitInstance
+import com.treinamento.app_fidelidade.data.remote.dto.request.UsuarioRegistro
 import com.treinamento.app_fidelidade.data.remote.dto.response.Usuario
 import com.treinamento.app_fidelidade.data.remote.service.AuthenticationService
 import com.treinamento.app_fidelidade.data.repository.AuthenticationRepository
@@ -103,25 +104,57 @@ class AuthenticationViewModel : ViewModel() {
     }
 
     /**
-     * Mantém compatibilidade com o botão da RegisterScreen.
-     *
-     * Este método deverá ser conectado ao método de cadastro
-     * do Repository assim que UsuarioRegistro, Service e Repository
-     * de cadastro forem definidos.
+     * Realiza o cadastro no backend.
      */
-    fun doRegister(usuarioLogin: UsuarioLogin) {
+    fun doRegister(usuarioRegister: UsuarioRegistro) {
+        /*
+         * Evita enviar mais de uma chamada caso o usuário
+         * clique várias vezes rapidamente.
+         */
         if (isLoading) {
             return
         }
 
-        /*
-         * A variável é utilizada para evitar aviso de parâmetro não usado.
-         * Quando o cadastro for implementado, ela será enviada ao Repository.
-         */
-        val email = usuarioLogin.email
+        viewModelScope.launch {
+            try {
+                isLoading = true
+                errorMessage = null
+                usuario = null
 
-        errorMessage =
-            "O cadastro para $email ainda precisa ser conectado ao Repository."
+                val response = repository.doRegister(usuarioRegister)
+
+                if (response.success && response.data != null) {
+                    usuario = response.data
+                } else {
+                    errorMessage = response.message
+                        ?.takeIf { message ->
+                            message.isNotBlank()
+                        }
+                        ?: "Não foi possível realizar o cadastro"
+                }
+            } catch (exception: HttpException) {
+                exception.printStackTrace()
+
+                errorMessage = getHttpErrorMessage(
+                    statusCode = exception.code()
+                )
+            } catch (exception: IOException) {
+                exception.printStackTrace()
+
+                errorMessage =
+                    "Não foi possível conectar ao servidor. Verifique sua internet."
+            } catch (exception: Exception) {
+                exception.printStackTrace()
+
+                errorMessage = exception.message
+                    ?.takeIf { message ->
+                        message.isNotBlank()
+                    }
+                    ?: "Ocorreu um erro inesperado ao realizar o cadastro."
+            } finally {
+                isLoading = false
+            }
+        }
     }
 
     /**
