@@ -4,13 +4,13 @@ import java.math.BigInteger
 import java.time.LocalDateTime
 
 data class Usuario(
-    val id: BigInteger,
-    val name: String,
+    val id: Long,
+    val nome: String,
     val email: String,
-    val password: String,
-    val pontosSaldo: BigInteger,
+    val password: String? = null,
+    val pontosSaldo: Long,
     val qrCode: String,
-    val urlImage: String,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime
+    val urlImage: String? = null,
+    val createdAt: LocalDateTime? = null,
+    val updatedAt: LocalDateTime? = null
 )

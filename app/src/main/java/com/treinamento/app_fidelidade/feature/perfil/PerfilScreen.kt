@@ -45,6 +45,7 @@ import com.treinamento.app_fidelidade.ui.components.FidelidadeBottomBar
 import com.treinamento.app_fidelidade.ui.components.LoadingContent
 import com.treinamento.app_fidelidade.ui.components.OfflineBanner
 import androidx.core.graphics.createBitmap
+import java.math.BigInteger
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -7,6 +7,7 @@ import com.treinamento.app_fidelidade.repository.ProdutoRepository
 import com.treinamento.app_fidelidade.repository.UsuarioRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import java.math.BigInteger
 
 private data class Controls(
     val busca: String = "",
@@ -43,7 +44,7 @@ class CatalogoViewModel(
             atualizando = c.atualizando,
             produtos = filtrados,
             categorias = categorias,
-            pontosAtuais = usuario.saldoPontos,
+            pontosAtuais = usuario.pontosSaldo,
             busca = c.busca,
             ordenacao = c.ordenacao,
             categoriaSelecionada = c.categoriaSelecionada,

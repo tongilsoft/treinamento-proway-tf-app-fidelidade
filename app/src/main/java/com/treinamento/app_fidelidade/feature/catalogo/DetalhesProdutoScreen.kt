@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.treinamento.app_fidelidade.model.Produto
 import com.treinamento.app_fidelidade.ui.components.FidelidadeBottomBar
+import java.math.BigInteger
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

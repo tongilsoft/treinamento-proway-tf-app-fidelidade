@@ -38,19 +38,19 @@ class InMemoryProdutoRepository : ProdutoRepository {
 class InMemoryUsuarioRepository : UsuarioRepository {
     private val usuario = MutableStateFlow(
         Usuario(
-            id = 123456789, 
+            id = 123456789,
             nome = "Natalie R. Rowan",
             email = "natalierrowan@gmail.com",
-            endereco = "Rua das Flores, 123",
-            saldoPontos = 13_123_678, 
+//            endereco = "Rua das Flores, 123",
+            pontosSaldo = 13_123_678,
             qrCode = "FIDELIDADE-123456789"
         )
     )
     override fun observarUsuario(): Flow<Usuario> = usuario
     override suspend fun atualizarUsuario(): Result<Unit> = Result.success(Unit)
     
-    override suspend fun atualizarDados(nome: String, email: String, endereco: String): Result<Unit> {
-        usuario.update { it.copy(nome = nome, email = email, endereco = endereco) }
+    override suspend fun atualizarDados(nome: String, email: String): Result<Unit> {
+        usuario.update { it.copy(nome = nome, email = email) }
         return Result.success(Unit)
     }
 

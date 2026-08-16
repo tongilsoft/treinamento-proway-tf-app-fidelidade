@@ -1,6 +1,7 @@
 package com.treinamento.app_fidelidade.feature.catalogo
 
 import com.treinamento.app_fidelidade.model.Produto
+import java.math.BigInteger
 
 enum class OrdenacaoCatalogo { MAIS_RELEVANTES, MENOR_PONTUACAO, MAIOR_PONTUACAO, NOME }
 
