@@ -3,14 +3,10 @@ package com.treinamento.app_fidelidade.model
 import java.math.BigInteger
 import java.time.LocalDateTime
 
-data class Usuario(
+data class ProdutosEstabelecimentos(
     val id: BigInteger,
-    val name: String,
-    val email: String,
-    val password: String,
-    val pontosSaldo: BigInteger,
-    val qrCode: String,
-    val urlImage: String,
+    val idProduto: BigInteger,
+    val idEstabelecimento: BigInteger,
     val createdAt: LocalDateTime,
     val updatedAt: LocalDateTime
 )
