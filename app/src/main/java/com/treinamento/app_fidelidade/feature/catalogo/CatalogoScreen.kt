@@ -1,7 +1,6 @@
 package com.treinamento.app_fidelidade.feature.catalogo
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -13,8 +12,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
@@ -23,8 +20,6 @@ import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -81,13 +76,13 @@ fun CatalogoScreen(
                     ) 
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack, 
-                            contentDescription = "Voltar",
-                            tint = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
+//                    IconButton(onClick = onBack) {
+//                        Icon(
+//                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+//                            contentDescription = "Voltar",
+//                            tint = MaterialTheme.colorScheme.onBackground
+//                        )
+//                    }
                 },
                 actions = {
                     IconButton(onClick = onNavigateToCart) {
@@ -150,13 +145,13 @@ fun CatalogoScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             ) 
                         },
-                        leadingIcon = { 
-                            Icon(
-                                imageVector = Icons.Default.Search, 
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
-                            ) 
-                        },
+//                        leadingIcon = {
+//                            Icon(
+//                                imageVector = Icons.Default.Search,
+//                                contentDescription = null,
+//                                tint = MaterialTheme.colorScheme.primary
+//                            )
+//                        },
                         trailingIcon = {
                             BadgedBox(
                                 badge = {
@@ -228,20 +223,20 @@ fun CatalogoScreen(
             }
         }
 
-        if (filtrosAbertos) {
-            FiltrosBottomSheet(
-                state = state,
-                onAplicar = { ordenacao, categoria ->
-                    onEvent(CatalogoEvent.AplicarFiltros(ordenacao, categoria))
-                    filtrosAbertos = false
-                },
-                onLimpar = {
-                    onEvent(CatalogoEvent.LimparFiltros)
-                    filtrosAbertos = false
-                },
-                onDismiss = { filtrosAbertos = false }
-            )
-        }
+//        if (filtrosAbertos) {
+//            FiltrosBottomSheet(
+//                state = state,
+////                onAplicar = { ordenacao, categoria ->
+////                    onEvent(CatalogoEvent.AplicarFiltros(ordenacao, categoria))
+////                    filtrosAbertos = false
+////                },
+//                onLimpar = {
+//                    onEvent(CatalogoEvent.LimparFiltros)
+//                    filtrosAbertos = false
+//                },
+//                onDismiss = { filtrosAbertos = false }
+//            )
+//        }
     }
 }
 
@@ -249,12 +244,12 @@ fun CatalogoScreen(
 @Composable
 private fun FiltrosBottomSheet(
     state: CatalogoUiState,
-    onAplicar: (OrdenacaoCatalogo, String?) -> Unit,
+
     onLimpar: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
-    var ordenacaoTemporaria by remember { mutableStateOf(state.ordenacao) }
+
     var categoriaTemporaria by remember { mutableStateOf(state.categoriaSelecionada) }
 
     ModalBottomSheet(
@@ -282,7 +277,7 @@ private fun FiltrosBottomSheet(
                 TextButton(
                     onClick = onLimpar,
                     enabled = state.quantidadeFiltrosAtivos > 0 || 
-                             ordenacaoTemporaria != OrdenacaoCatalogo.MAIS_RELEVANTES || 
+//                             ordenacaoTemporaria != OrdenacaoCatalogo.MAIS_RELEVANTES ||
                              categoriaTemporaria != null
                 ) {
                     Text("Limpar filtros")
@@ -295,15 +290,15 @@ private fun FiltrosBottomSheet(
                 color = MaterialTheme.colorScheme.onSurface
             )
             
-            Column(Modifier.selectableGroup()) {
-                OrdenacaoCatalogo.entries.forEach { ordenacao ->
-                    FiltroOpcao(
-                        text = ordenacao.label,
-                        selected = ordenacaoTemporaria == ordenacao,
-                        onClick = { ordenacaoTemporaria = ordenacao }
-                    )
-                }
-            }
+//            Column(Modifier.selectableGroup()) {
+//                OrdenacaoCatalogo.entries.forEach { ordenacao ->
+//                    FiltroOpcao(
+//                        text = ordenacao.label,
+//                        selected = ordenacaoTemporaria == ordenacao,
+//                        onClick = { ordenacaoTemporaria = ordenacao }
+//                    )
+//                }
+//            }
 
             HorizontalDivider(color = MaterialTheme.colorScheme.outline)
 
@@ -328,16 +323,16 @@ private fun FiltrosBottomSheet(
                 }
             }
 
-            Button(
-                onClick = { onAplicar(ordenacaoTemporaria, categoriaTemporaria) },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            ) {
-                Text("Aplicar filtros")
-            }
+//            Button(
+//                onClick = { onAplicar(ordenacaoTemporaria, categoriaTemporaria) },
+//                modifier = Modifier.fillMaxWidth(),
+//                colors = ButtonDefaults.buttonColors(
+//                    containerColor = MaterialTheme.colorScheme.primary,
+//                    contentColor = MaterialTheme.colorScheme.onPrimary
+//                )
+//            ) {
+//                Text("Aplicar filtros")
+//            }
         }
     }
 }
@@ -372,10 +367,10 @@ private fun FiltroOpcao(
     }
 }
 
-private val OrdenacaoCatalogo.label: String
-    get() = when (this) {
-        OrdenacaoCatalogo.MAIS_RELEVANTES -> "Mais relevantes"
-        OrdenacaoCatalogo.MENOR_PONTUACAO -> "Menor pontuação"
-        OrdenacaoCatalogo.MAIOR_PONTUACAO -> "Maior pontuação"
-        OrdenacaoCatalogo.NOME -> "Nome"
-    }
+//private val OrdenacaoCatalogo.label: String
+//    get() = when (this) {
+//        OrdenacaoCatalogo.MAIS_RELEVANTES -> "Mais relevantes"
+//        OrdenacaoCatalogo.MENOR_PONTUACAO -> "Menor pontuação"
+//        OrdenacaoCatalogo.MAIOR_PONTUACAO -> "Maior pontuação"
+//        OrdenacaoCatalogo.NOME -> "Nome"
+//    }

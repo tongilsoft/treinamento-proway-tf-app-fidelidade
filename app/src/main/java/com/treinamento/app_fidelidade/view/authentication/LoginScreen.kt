@@ -41,7 +41,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.treinamento.app_fidelidade.model.UsuarioLogin
+import com.treinamento.app_fidelidade.rotas.Rotas
 import com.treinamento.app_fidelidade.viewmodel.AuthenticationViewModel
 
 private val LoginFieldColor = Color(0xFF0D2236)
@@ -53,6 +55,7 @@ private val LoginSecondaryTextColor = Color(0xFFB7C1CE)
 @Composable
 fun LoginScreen(
     viewModel: AuthenticationViewModel,
+    navController: NavHostController,
     onLoginClick: () -> Unit,
     onShowMessage: (String) -> Unit
 ) {
@@ -67,6 +70,7 @@ fun LoginScreen(
     var passwordVisible by remember {
         mutableStateOf(false)
     }
+
 
     Column(
         modifier = Modifier.fillMaxWidth(),

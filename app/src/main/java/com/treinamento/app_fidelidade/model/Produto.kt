@@ -9,7 +9,7 @@ data class Produto(
     val descricao: String,
     val valorPontos: Long,
     val categoria: String,
-    val relevancia: Int,
+//    val relevancia: Int,
 //    val idCategoria: Long,
     val imagemUrl: String? = null,
     val createdAt: LocalDateTime? = null,

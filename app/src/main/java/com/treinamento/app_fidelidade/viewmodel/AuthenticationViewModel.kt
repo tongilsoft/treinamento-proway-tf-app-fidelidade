@@ -5,17 +5,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 import com.treinamento.app_fidelidade.data.remote.RetrofitInstance
 import com.treinamento.app_fidelidade.data.remote.dto.request.UsuarioRegistro
 import com.treinamento.app_fidelidade.data.remote.dto.response.Usuario
 import com.treinamento.app_fidelidade.data.remote.service.AuthenticationService
 import com.treinamento.app_fidelidade.data.repository.AuthenticationRepository
 import com.treinamento.app_fidelidade.model.UsuarioLogin
+import com.treinamento.app_fidelidade.rotas.Rotas
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
 
 class AuthenticationViewModel : ViewModel() {
+
 
     private val service = AuthenticationService(
         api = RetrofitInstance.api
@@ -42,6 +48,7 @@ class AuthenticationViewModel : ViewModel() {
      */
     var isLoading by mutableStateOf(false)
         private set
+
 
     /*
      * Mensagem que será apresentada no Snackbar.
@@ -71,6 +78,8 @@ class AuthenticationViewModel : ViewModel() {
 
                 if (response.success && response.data != null) {
                     usuario = response.data
+
+//                    redirectScreen(Rotas.FIDELIDADE, navController)
                 } else {
                     errorMessage = response.message
                         ?.takeIf { message ->
@@ -106,7 +115,7 @@ class AuthenticationViewModel : ViewModel() {
     /**
      * Realiza o cadastro no backend.
      */
-    fun doRegister(usuarioRegister: UsuarioRegistro) {
+    fun doRegister(usuarioRegister: UsuarioRegistro, navController: NavHostController) {
         /*
          * Evita enviar mais de uma chamada caso o usuário
          * clique várias vezes rapidamente.
@@ -125,6 +134,9 @@ class AuthenticationViewModel : ViewModel() {
 
                 if (response.success && response.data != null) {
                     usuario = response.data
+
+//                    redirectScreen(Rotas.FIDELIDADE, navController)
+
                 } else {
                     errorMessage = response.message
                         ?.takeIf { message ->
@@ -156,6 +168,17 @@ class AuthenticationViewModel : ViewModel() {
             }
         }
     }
+
+//    fun redirectScreen(rotaFocus: String, navController: NavHostController){
+//        try {
+//            navController.navigate(rotaFocus) {
+//                launchSingleTop = false
+//            }
+//        }
+//        catch (e: Exception){
+//            println(e.message)
+//        }
+//    }
 
     /**
      * Limpa a mensagem depois que o Snackbar termina de apresentá-la.

@@ -32,6 +32,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.treinamento.app_fidelidade.rotas.Rotas
 import com.treinamento.app_fidelidade.viewmodel.AuthenticationViewModel
 import kotlinx.coroutines.launch
 
@@ -46,8 +50,10 @@ private const val REGISTER_TAB = 1
 
 @Composable
 fun AuthenticationScreen(
+    navController: NavHostController,
     viewModel: AuthenticationViewModel = viewModel()
 ) {
+
     var selectedTab by remember {
         mutableIntStateOf(LOGIN_TAB)
     }
@@ -65,6 +71,7 @@ fun AuthenticationScreen(
     val authenticatedUser = viewModel.usuario
     val errorMessage = viewModel.errorMessage
 
+
     /*
      * Este efeito será executado quando o usuário autenticado for alterado.
      *
@@ -73,7 +80,17 @@ fun AuthenticationScreen(
      */
     LaunchedEffect(authenticatedUser) {
         if (authenticatedUser != null) {
-
+            try {
+                navController.navigate(Rotas.FIDELIDADE) {
+                    popUpTo(Rotas.AUTHENTICATION) {
+                        inclusive = false
+                    }
+                    launchSingleTop = false
+                }
+            }catch (e: Exception){
+                println(e.message)
+                println("DEURUIN")
+            }
         }
     }
 
@@ -155,6 +172,7 @@ fun AuthenticationScreen(
                 LOGIN_TAB -> {
                     LoginScreen(
                         viewModel = viewModel,
+                        navController,
                         onLoginClick = {
                             if (!viewModel.isLoading) {
                                 selectedTab = REGISTER_TAB
@@ -173,6 +191,7 @@ fun AuthenticationScreen(
                 REGISTER_TAB -> {
                     RegisterScreen(
                         viewModel = viewModel,
+                        navController,
                         onRegisterClick = {
                             if (!viewModel.isLoading) {
                                 selectedTab = LOGIN_TAB

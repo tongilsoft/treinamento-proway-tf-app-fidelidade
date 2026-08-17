@@ -42,6 +42,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.treinamento.app_fidelidade.data.remote.dto.request.UsuarioRegistro
 import com.treinamento.app_fidelidade.model.UsuarioLogin
 import com.treinamento.app_fidelidade.viewmodel.AuthenticationViewModel
@@ -57,6 +58,7 @@ private val RegisterSecondaryTextColor = Color(0xFFB7C1CE)
 @Composable
 fun RegisterScreen(
     viewModel: AuthenticationViewModel,
+    navController: NavHostController,
     onRegisterClick: () -> Unit,
     onShowMessage: (String) -> Unit
 ) {
@@ -258,7 +260,7 @@ fun RegisterScreen(
                                         BigInteger.ZERO,
                                         null,
                                         null, null
-                                    )
+                                    ), navController
                                 )
                             }
                         }
