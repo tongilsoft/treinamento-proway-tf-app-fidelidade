@@ -10,6 +10,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.treinamento.app_fidelidade.feature.catalogo.CatalogoRoute
 import com.treinamento.app_fidelidade.feature.catalogo.CatalogoViewModel
 import com.treinamento.app_fidelidade.feature.catalogo.DetalhesProdutoRoute
+import com.treinamento.app_fidelidade.feature.carrinho.CarrinhoScreen
+import com.treinamento.app_fidelidade.feature.resgate.ConfirmarResgateScreen
+import com.treinamento.app_fidelidade.feature.resgate.ListaResgatesScreen
+import com.treinamento.app_fidelidade.feature.resgate.OrigemResgate
 import com.treinamento.app_fidelidade.feature.perfil.AlterarSenhaScreen
 import com.treinamento.app_fidelidade.feature.perfil.EditarPerfilScreen
 import com.treinamento.app_fidelidade.feature.perfil.PerfilEvent
@@ -17,7 +21,10 @@ import com.treinamento.app_fidelidade.feature.perfil.PerfilRoute
 import com.treinamento.app_fidelidade.feature.perfil.PerfilViewModel
 import com.treinamento.app_fidelidade.repository.*
 
-private enum class AppRoute { CATALOGO, DETALHES, PERFIL, EDITAR_PERFIL, ALTERAR_SENHA }
+private enum class AppRoute {
+    CATALOGO, DETALHES, PERFIL, EDITAR_PERFIL, ALTERAR_SENHA,
+    CARRINHO, CONFIRMAR_RESGATE, LISTA_RESGATES
+}
 
 @Composable
 fun FidelidadeApp() {
@@ -36,19 +43,23 @@ fun FidelidadeApp() {
 
     var currentRoute by rememberSaveable { mutableStateOf(AppRoute.CATALOGO) }
 
+    // De onde a confirmação foi aberta
+    var origemResgate by remember { mutableStateOf<OrigemResgate>(OrigemResgate.Carrinho) }
+
     fun navigate(route: String) {
         when (route) {
             "home" -> currentRoute = AppRoute.CATALOGO
             "catalogo" -> currentRoute = AppRoute.CATALOGO
             "perfil" -> currentRoute = AppRoute.PERFIL
-            "carrinho" -> { /* Destino externo */ }
+            "carrinho" -> currentRoute = AppRoute.CARRINHO
+            "resgates" -> currentRoute = AppRoute.LISTA_RESGATES
         }
     }
 
     when (currentRoute) {
         AppRoute.CATALOGO -> CatalogoRoute(
             viewModel = catalogoViewModel,
-            onBack = { /* Home ou fechar app */ },
+            onBack = { },
             onNavigateToDetails = {
                 currentRoute = AppRoute.DETALHES
             },
@@ -88,6 +99,31 @@ fun FidelidadeApp() {
                     onSuccess = { currentRoute = AppRoute.PERFIL }
                 )
             }
+        )
+
+        AppRoute.CARRINHO -> CarrinhoScreen(
+            onBack = { currentRoute = AppRoute.CATALOGO },
+            onContinuar = {
+                origemResgate = OrigemResgate.Carrinho
+                currentRoute = AppRoute.CONFIRMAR_RESGATE
+            },
+            onNavigate = ::navigate
+        )
+
+        AppRoute.CONFIRMAR_RESGATE -> ConfirmarResgateScreen(
+            origem = origemResgate,
+            onBack = { currentRoute = AppRoute.CARRINHO },
+            onResgateFinalizado = { currentRoute = AppRoute.LISTA_RESGATES },
+            onNavigate = ::navigate
+        )
+
+        AppRoute.LISTA_RESGATES -> ListaResgatesScreen(
+            onBack = { currentRoute = AppRoute.PERFIL },
+            onConfirmarPendente = { id ->
+                origemResgate = OrigemResgate.Pendente(id)
+                currentRoute = AppRoute.CONFIRMAR_RESGATE
+            },
+            onNavigate = ::navigate
         )
     }
 }
