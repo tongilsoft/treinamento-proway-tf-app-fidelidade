@@ -53,7 +53,7 @@
       "responses": [
         {
           "uuid": "00000000-0000-0000-0000-100000000002",
-          "body": "{{setVar 'novoNome' (bodyRaw 'name')}}{{setVar 'novoEmail' (bodyRaw 'email')}}{{setVar 'novaSenha' (bodyRaw 'senha')}}{{setVar 'agora' (now)}}{{setVar 'novoId' (add (len (dataRaw 'usuariosCadastrados')) 1)}}{{setVar 'novoUsuario' (objectMerge (dataRaw 'usuarioDefault') (object id=@novoId name=@novoNome email=@novoEmail senha=@novaSenha createdAt=@agora updatedAt=@agora))}}{{setData 'push' 'usuariosCadastrados' '' @novoUsuario}}{{setData 'set' 'usuarioAutenticadoAtual' 'idUsuarioAtual' @novoId}}{\n  \"success\": true,\n  \"message\": \"Cadastro realizado com sucesso\",\n  \"data\": {\n    \"id\": {{@novoId}},\n    \"name\": \"{{@novoNome}}\",\n    \"email\": \"{{@novoEmail}}\",\n    \"pontosSaldo\": {{objectPath @novoUsuario 'pontosSaldo'}},\n    \"qrCode\": \"{{objectPath @novoUsuario 'qrCode'}}\",\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\",\n    \"createdAt\": \"{{@agora}}\",\n    \"updatedAt\": \"{{@agora}}\"\n  }\n}",
+          "body": "{{setVar 'novoNome' (bodyRaw 'name')}}{{#unless @novoNome}}{{setVar 'novoNome' (bodyRaw 'nome')}}{{/unless}}{{setVar 'novoEmail' (bodyRaw 'email')}}{{setVar 'novaSenha' (bodyRaw 'senha')}}{{#unless @novaSenha}}{{setVar 'novaSenha' (bodyRaw 'password')}}{{/unless}}{{setVar 'agora' (now)}}{{setVar 'novoId' (add (len (dataRaw 'usuariosCadastrados')) 1)}}{{setVar 'novoUsuario' (objectMerge (dataRaw 'usuarioDefault') (object id=@novoId name=@novoNome email=@novoEmail senha=@novaSenha createdAt=@agora updatedAt=@agora))}}{{setData 'push' 'usuariosCadastrados' '' @novoUsuario}}{\n  \"success\": true,\n  \"message\": \"Cadastro realizado com sucesso\",\n  \"data\": {\n    \"id\": {{@novoId}},\n    \"name\": \"{{@novoNome}}\",\n    \"email\": \"{{@novoEmail}}\",\n    \"pontosSaldo\": {{objectPath @novoUsuario 'pontosSaldo'}},\n    \"qrCode\": \"{{objectPath @novoUsuario 'qrCode'}}\",\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\",\n    \"createdAt\": \"{{@agora}}\",\n    \"updatedAt\": \"{{@agora}}\"\n  }\n}",
           "latency": 300,
           "statusCode": 201,
           "label": "Success",
@@ -163,6 +163,42 @@
           "uuid": "00000000-0000-0000-0000-100000000005",
           "body": "{{setVar 'idAtual' (dataRaw 'usuarioAutenticadoAtual' 'idUsuarioAtual')}}{{setVar 'usuarioAtual' (find (dataRaw 'usuariosCadastrados') (object id=@idAtual))}}{\n  \"success\": true,\n  \"data\": {{{stringify (objectPath @usuarioAtual 'movimentacoes')}}}\n}",
           "latency": 150,
+          "statusCode": 200,
+          "label": "Success",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "00000000-0000-0000-0000-000000000015",
+      "type": "http",
+      "documentation": "Transferir pontos entre usuarios",
+      "method": "post",
+      "endpoint": "pontos/transferir",
+      "responses": [
+        {
+          "uuid": "00000000-0000-0000-0000-100000000015",
+          "body": "{{setVar 'idAtual' (dataRaw 'usuarioAutenticadoAtual' 'idUsuarioAtual')}}{{setVar 'emailDestino' (bodyRaw 'emailDestino')}}{{#unless @emailDestino}}{{setVar 'emailDestino' (bodyRaw 'email')}}{{/unless}}{{setVar 'pontosTransferir' (bodyRaw 'valorPontos')}}{{#unless @pontosTransferir}}{{setVar 'pontosTransferir' (bodyRaw 'pontos')}}{{/unless}}{{#unless @pontosTransferir}}{{setVar 'pontosTransferir' (bodyRaw 'pontosTransferidos')}}{{/unless}}{{#unless @pontosTransferir}}{{setVar 'pontosTransferir' (bodyRaw 'quantidade')}}{{/unless}}{{setVar 'agora' (now)}}{{setVar 'usuarioAtual' (find (dataRaw 'usuariosCadastrados') (object id=@idAtual))}}{{setVar 'usuarioDestino' (find (dataRaw 'usuariosCadastrados') (object email=@emailDestino))}}{{setVar 'nomeAtual' (objectPath @usuarioAtual 'name')}}{{setVar 'saldoOrigem' (objectPath @usuarioAtual 'pontosSaldo')}}{{#if @usuarioAtual}}{{#if @usuarioDestino}}{{setVar 'idDestino' (objectPath @usuarioDestino 'id')}}{{setVar 'nomeDestino' (objectPath @usuarioDestino 'name')}}{{#if (eq @idDestino @idAtual)}}{{status 400}}{\n  \"success\": false,\n  \"message\": \"Nao e possivel transferir pontos para o proprio usuario\"\n}{{else}}{{#if (gt @pontosTransferir 0)}}{{#if (gte @saldoOrigem @pontosTransferir)}}{{#each (dataRaw 'usuariosCadastrados')}}{{#if (eq this.id @../idDestino)}}{{setVar 'saldoAtualDestino' (add this.pontosSaldo @../pontosTransferir)}}{{setVar 'proximoIdMovDestino' (add (len this.movimentacoes) 1)}}{{setData 'set' 'usuariosCadastrados' (concat @index '.pontosSaldo') @saldoAtualDestino}}{{setData 'inc' 'usuariosCadastrados' (concat @index '.totalPontosGanhos') @../pontosTransferir}}{{setData 'set' 'usuariosCadastrados' (concat @index '.updatedAt') @../agora}}{{setData 'push' 'usuariosCadastrados' (concat @index '.movimentacoes') (object id=@proximoIdMovDestino idUsuario=@../idDestino idProduto=null tipo='credito' valorPontos=@../pontosTransferir descricao=(concat 'Transferencia recebida de ' @../nomeAtual) data=(now 'yyyy-MM-dd') createdAt=@../agora updatedAt=@../agora)}}{{/if}}{{#if (eq this.id @../idAtual)}}{{setVar 'saldoAnteriorOrigem' this.pontosSaldo}}{{setVar 'saldoAtualOrigem' (subtract this.pontosSaldo @../pontosTransferir)}}{{setVar 'proximoIdMovOrigem' (add (len this.movimentacoes) 1)}}{{setData 'set' 'usuariosCadastrados' (concat @index '.pontosSaldo') @saldoAtualOrigem}}{{setData 'inc' 'usuariosCadastrados' (concat @index '.pontosUtilizados') @../pontosTransferir}}{{setData 'set' 'usuariosCadastrados' (concat @index '.updatedAt') @../agora}}{{setData 'push' 'usuariosCadastrados' (concat @index '.movimentacoes') (object id=@proximoIdMovOrigem idUsuario=@../idAtual idProduto=null tipo='debito' valorPontos=@../pontosTransferir descricao=(concat 'Transferencia enviada para ' @../nomeDestino) data=(now 'yyyy-MM-dd') createdAt=@../agora updatedAt=@../agora)}}{\n  \"success\": true,\n  \"message\": \"Transferencia realizada com sucesso\",\n  \"data\": {\n    \"idUsuarioOrigem\": {{@../idAtual}},\n    \"nomeUsuarioOrigem\": \"{{@../nomeAtual}}\",\n    \"idUsuarioDestino\": {{@../idDestino}},\n    \"nomeUsuarioDestino\": \"{{@../nomeDestino}}\",\n    \"emailDestino\": \"{{@../emailDestino}}\",\n    \"pontosTransferidos\": {{@../pontosTransferir}},\n    \"pontosSaldoAnteriorOrigem\": {{@saldoAnteriorOrigem}},\n    \"pontosSaldoAtualOrigem\": {{@saldoAtualOrigem}},\n    \"createdAt\": \"{{@../agora}}\"\n  }\n}{{/if}}{{/each}}{{else}}{{status 400}}{\n  \"success\": false,\n  \"message\": \"Saldo de pontos insuficiente para realizar a transferencia\",\n  \"debug\": {\n    \"pontosSolicitados\": {{@pontosTransferir}},\n    \"pontosSaldoAtual\": {{@saldoOrigem}}\n  }\n}{{/if}}{{else}}{{status 400}}{\n  \"success\": false,\n  \"message\": \"Informe uma quantidade de pontos maior que zero no campo valorPontos\",\n  \"debug\": {\n    \"valorRecebido\": {{#if @pontosTransferir}}{{@pontosTransferir}}{{else}}null{{/if}},\n    \"camposAceitos\": [\"valorPontos\", \"pontos\", \"pontosTransferidos\", \"quantidade\"]\n  }\n}{{/if}}{{/if}}{{else}}{{status 404}}{\n  \"success\": false,\n  \"message\": \"Usuario destinatario nao encontrado\",\n  \"debug\": {\n    \"emailDestinoRecebido\": \"{{@emailDestino}}\"\n  }\n}{{/if}}{{else}}{{status 401}}{\n  \"success\": false,\n  \"message\": \"Usuario de origem nao autenticado. Faca login antes de transferir pontos\"\n}{{/if}}",
+          "latency": 250,
           "statusCode": 200,
           "label": "Success",
           "headers": [
@@ -353,6 +389,10 @@
     {
       "type": "route",
       "uuid": "00000000-0000-0000-0000-000000000005"
+    },
+    {
+      "type": "route",
+      "uuid": "00000000-0000-0000-0000-000000000015"
     },
     {
       "type": "route",
