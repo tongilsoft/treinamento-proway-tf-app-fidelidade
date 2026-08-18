@@ -1,0 +1,255 @@
+openapi: 3.0.0
+info:
+  title: openapi-spec
+  version: 1.0.0
+paths:
+  /estabelecimento/:id/bonificarPontos:
+    post:
+      summary: Bonificar pontos
+      operationId: >-
+        c_users_betop_onedrive_documentos_bruno_androidapi_-_programa_de_pontos_bonificar_pontos_yml
+      description: Bonificar pontos
+      tags:
+        - ''
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+              example: {}
+      parameters:
+        - name: id
+          in: path
+          description: ''
+          required: true
+          schema:
+            type: string
+  /auth/cadastro:
+    post:
+      summary: Cadastro de usuario
+      operationId: >-
+        c_users_betop_onedrive_documentos_bruno_androidapi_-_programa_de_pontos_cadastro_de_usuario_yml
+      description: Cadastro de usuario
+      tags:
+        - ''
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+              example: {}
+  /produto:
+    get:
+      summary: Catalogo de produtos para resgate
+      operationId: >-
+        c_users_betop_onedrive_documentos_bruno_androidapi_-_programa_de_pontos_catalogo_de_produtos_para_resgate_yml
+      description: Catalogo de produtos para resgate
+      tags:
+        - ''
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+              example: {}
+  /resgate:
+    post:
+      summary: Confirmar resgate
+      operationId: >-
+        c_users_betop_onedrive_documentos_bruno_androidapi_-_programa_de_pontos_confirmar_resgate_yml
+      description: Confirmar resgate
+      tags:
+        - ''
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+              example: {}
+      requestBody:
+        $ref: '#/components/requestBodies/confirmar_resgate'
+  /pontos/extrato:
+    get:
+      summary: Extrato de movimentacoes
+      operationId: >-
+        c_users_betop_onedrive_documentos_bruno_androidapi_-_programa_de_pontos_extrato_de_movimentacoes_yml
+      description: Extrato de movimentacoes
+      tags:
+        - ''
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+              example: {}
+  /auth/login:
+    post:
+      summary: Login do usuario
+      operationId: >-
+        c_users_betop_onedrive_documentos_bruno_androidapi_-_programa_de_pontos_login_do_usuario_yml
+      description: Login do usuario
+      tags:
+        - ''
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+              example: {}
+      requestBody:
+        $ref: '#/components/requestBodies/login_do_usuario'
+  /usuarios/meusDados:
+    get:
+      summary: Meus dados
+      operationId: >-
+        c_users_betop_onedrive_documentos_bruno_androidapi_-_programa_de_pontos_meus_dados_yml
+      description: Meus dados
+      tags:
+        - ''
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+              example: {}
+  /parceiros:
+    get:
+      summary: Parceiros de farmacia
+      operationId: >-
+        c_users_betop_onedrive_documentos_bruno_androidapi_-_programa_de_pontos_parceiros_de_farmacia_yml
+      description: Parceiros de farmacia
+      tags:
+        - ''
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        endereco:
+                          type: string
+                        latitude:
+                          type: number
+                        longitude:
+                          type: number
+                        telefone:
+                          type: string
+                        distancia:
+                          type: string
+                        createdAt:
+                          type: string
+                        updatedAt:
+                          type: string
+              example:
+                success: true
+                data:
+                  - id: 1
+                    name: Drogasil
+                    endereco: Av. Paulista, 1520
+                    latitude: -23.561684
+                    longitude: -46.656139
+                    telefone: (11) 4002-8922
+                    distancia: 1.9 km
+                    createdAt: '2025-01-10T10:00:00Z'
+                    updatedAt: '2026-08-10T09:00:00Z'
+                  - id: 2
+                    name: Ultrafarma
+                    endereco: Av. Jabaquara, 1548
+                    latitude: -23.616671
+                    longitude: -46.640822
+                    telefone: (11) 5079-6100
+                    distancia: 3.2 km
+                    createdAt: '2025-01-10T10:00:00Z'
+                    updatedAt: '2026-08-10T09:00:00Z'
+                  - id: 3
+                    name: Farmacia do Povo
+                    endereco: Rua Vergueiro, 1087
+                    latitude: -23.582999
+                    longitude: -46.635952
+                    telefone: (11) 3555-9090
+                    distancia: 2.4 km
+                    createdAt: '2025-01-10T10:00:00Z'
+                    updatedAt: '2026-08-10T09:00:00Z'
+  /pontos:
+    get:
+      summary: Saldo de pontos
+      operationId: >-
+        c_users_betop_onedrive_documentos_bruno_androidapi_-_programa_de_pontos_saldo_de_pontos_yml
+      description: Saldo de pontos
+      tags:
+        - ''
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+              example: {}
+servers:
+  - url: http://localhost:3000//api
+    description: Base Server
+  - url: http://localhost:3000//api
+    description: Environment 1
+components:
+  schemas:
+    confirmar_resgate:
+      type: object
+      properties:
+        idProduto:
+          type: integer
+      example:
+        idProduto: 1
+    login_do_usuario:
+      type: object
+      properties:
+        email:
+          type: string
+        senha:
+          type: string
+      example:
+        email: joao@example.com
+        senha: '123456'
+  requestBodies:
+    confirmar_resgate:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/confirmar_resgate'
+      description: ''
+      required: true
+    login_do_usuario:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/login_do_usuario'
+      description: ''
+      required: true
+  securitySchemes: {}
