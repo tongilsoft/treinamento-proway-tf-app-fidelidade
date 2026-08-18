@@ -1,4 +1,4 @@
-package com.treinamento.app_fidelidade
+package com.treinamento.app_fidelidade.view.fidelidade
 
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable

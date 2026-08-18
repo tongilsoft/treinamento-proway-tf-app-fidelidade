@@ -1,5 +1,7 @@
 package com.treinamento.app_fidelidade.feature.perfil
 
+import java.math.BigInteger
+
 data class PerfilUiState(
     val carregando: Boolean = true,
     val atualizando: Boolean = false,

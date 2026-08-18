@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.treinamento.app_fidelidade.model.Produto
+import java.math.BigInteger
 
 @Composable
 fun ProdutoCard(

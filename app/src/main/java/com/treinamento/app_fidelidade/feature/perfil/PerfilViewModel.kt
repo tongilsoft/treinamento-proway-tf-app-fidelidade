@@ -27,8 +27,7 @@ class PerfilViewModel(
             usuarioId = usuario.id,
             nome = usuario.nome,
             email = usuario.email,
-            endereco = usuario.endereco,
-            saldoPontos = usuario.saldoPontos,
+            saldoPontos = usuario.pontosSaldo,
             qrCode = usuario.qrCode,
             offline = c.offline,
             mensagem = c.mensagem
@@ -46,7 +45,7 @@ class PerfilViewModel(
     private fun salvarDados(nome: String, email: String, endereco: String) {
         viewModelScope.launch {
             controls.update { it.copy(atualizando = true, mensagem = null) }
-            usuarioRepository.atualizarDados(nome, email, endereco)
+            usuarioRepository.atualizarDados(nome, email)
                 .onSuccess {
                     controls.update { it.copy(atualizando = false, mensagem = "Dados atualizados com sucesso!") }
                 }
