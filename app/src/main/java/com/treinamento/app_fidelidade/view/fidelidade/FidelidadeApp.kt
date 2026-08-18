@@ -7,6 +7,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.treinamento.app_fidelidade.data.remote.RetrofitInstance
+import com.treinamento.app_fidelidade.rotas.Rotas
+import com.treinamento.app_fidelidade.feature.catalogo.CatalogoEvent
+import com.treinamento.app_fidelidade.viewmodel.AuthenticationViewModel
 import com.treinamento.app_fidelidade.feature.catalogo.CatalogoRoute
 import com.treinamento.app_fidelidade.feature.catalogo.CatalogoViewModel
 import com.treinamento.app_fidelidade.feature.catalogo.DetalhesProdutoRoute
@@ -20,9 +25,9 @@ import com.treinamento.app_fidelidade.repository.*
 private enum class AppRoute { CATALOGO, DETALHES, PERFIL, EDITAR_PERFIL, ALTERAR_SENHA }
 
 @Composable
-fun FidelidadeApp() {
-    val produtoRepository = remember { InMemoryProdutoRepository() }
-    val usuarioRepository = remember { InMemoryUsuarioRepository() }
+fun FidelidadeApp(navController: NavHostController) {
+    val produtoRepository = remember { RemoteProdutoRepository(RetrofitInstance.api) }
+    val usuarioRepository = remember { RemoteUsuarioRepository(RetrofitInstance.api) }
 
     val catalogoViewModel: CatalogoViewModel = viewModel(
         factory = factory { CatalogoViewModel(produtoRepository, usuarioRepository) }
@@ -30,6 +35,14 @@ fun FidelidadeApp() {
     val perfilViewModel: PerfilViewModel = viewModel(
         factory = factory { PerfilViewModel(usuarioRepository) }
     )
+
+    // Obter AuthenticationViewModel compartilhado para poder limpar estado no logout
+    val authViewModel: AuthenticationViewModel = viewModel()
+
+    LaunchedEffect(Unit) {
+        catalogoViewModel.onEvent(CatalogoEvent.Atualizar)
+        perfilViewModel.onEvent(PerfilEvent.Atualizar)
+    }
 
     val catalogo by catalogoViewModel.uiState.collectAsStateWithLifecycle()
     val perfil by perfilViewModel.uiState.collectAsStateWithLifecycle()
@@ -67,6 +80,13 @@ fun FidelidadeApp() {
             viewModel = perfilViewModel,
             onNavigateToEditarPerfil = { currentRoute = AppRoute.EDITAR_PERFIL },
             onNavigateToAlterarSenha = { currentRoute = AppRoute.ALTERAR_SENHA },
+            onSairClick = {
+                // Limpar estado de autenticação e voltar para a tela de autenticação
+                authViewModel.clearAuthenticationState()
+                navController.navigate(Rotas.AUTHENTICATION) {
+                    popUpTo(Rotas.FIDELIDADE) { inclusive = false }
+                }
+            },
             onNavigate = ::navigate
         )
 
