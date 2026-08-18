@@ -17,7 +17,7 @@
       "responses": [
         {
           "uuid": "00000000-0000-0000-0000-100000000001",
-          "body": "{\n  \"success\": true,\n  \"message\": \"Login realizado com sucesso\",\n  \"data\": {\n    \"idUsuario\": {{data 'usuarios' 'idUsuario'}},\n    \"name\": \"{{data 'usuarios' 'name'}}\",\n    \"email\": \"{{data 'usuarios' 'email'}}\",\n    \"pontosSaldo\": {{data 'usuarios' 'pontosSaldo'}},\n    \"qrCode\": \"{{data 'usuarios' 'qrCode'}}\",\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\",\n    \"createdAt\": \"{{data 'usuarios' 'createdAt'}}\",\n    \"updatedAt\": \"{{data 'usuarios' 'updatedAt'}}\"\n  }\n}",
+          "body": "{{setVar 'emailBusca' (bodyRaw 'email')}}{{setVar 'senhaBusca' (bodyRaw 'senha')}}{{setVar 'usuarioEncontrado' (find (dataRaw 'usuariosCadastrados') (object email=@emailBusca senha=@senhaBusca))}}{{#if @usuarioEncontrado}}{{setData 'set' 'usuarioAutenticadoAtual' 'idUsuarioAtual' (objectPath @usuarioEncontrado 'id')}}{\n  \"success\": true,\n  \"message\": \"Login realizado com sucesso\",\n  \"data\": {\n    \"id\": {{objectPath @usuarioEncontrado 'id'}},\n    \"name\": \"{{objectPath @usuarioEncontrado 'name'}}\",\n    \"email\": \"{{objectPath @usuarioEncontrado 'email'}}\",\n    \"pontosSaldo\": {{objectPath @usuarioEncontrado 'pontosSaldo'}},\n    \"qrCode\": \"{{objectPath @usuarioEncontrado 'qrCode'}}\",\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\",\n    \"createdAt\": \"{{objectPath @usuarioEncontrado 'createdAt'}}\",\n    \"updatedAt\": \"{{objectPath @usuarioEncontrado 'updatedAt'}}\"\n  }\n}{{else}}{\n  \"success\": false,\n  \"message\": \"Email ou senha invalidos\",\n  \"debug\": {\n    \"emailRecebido\": \"{{@emailBusca}}\",\n    \"senhaRecebida\": {{#if @senhaBusca}}true{{else}}false{{/if}},\n    \"totalUsuariosCadastrados\": {{len (dataRaw 'usuariosCadastrados')}}\n  }\n}{{/if}}",
           "latency": 200,
           "statusCode": 200,
           "label": "Success",
@@ -53,7 +53,7 @@
       "responses": [
         {
           "uuid": "00000000-0000-0000-0000-100000000002",
-          "body": "{{setVar 'novoNome' (body 'name')}}{{setVar 'novoEmail' (body 'email')}}{{setVar 'novaSenha' (body 'senha')}}{{setData 'set' 'usuarios' 'idUsuario' 2}}{{setData 'set' 'usuarios' 'name' @novoNome}}{{setData 'set' 'usuarios' 'email' @novoEmail}}{{setData 'set' 'usuarios' 'senha' @novaSenha}}{{setData 'set' 'usuarios' 'pontosSaldo' 0}}{{setData 'set' 'usuarios' 'pontosUtilizados' 0}}{{setData 'set' 'usuarios' 'totalPontosGanhos' 0}}{{setData 'set' 'usuarios' 'updatedAt' '2026-08-10T09:00:00Z'}}{\n  \"success\": true,\n  \"message\": \"Cadastro realizado com sucesso\",\n  \"data\": {\n    \"idUsuario\": {{data 'usuarios' 'idUsuario'}},\n    \"name\": \"{{data 'usuarios' 'name'}}\",\n    \"email\": \"{{data 'usuarios' 'email'}}\",\n    \"pontosSaldo\": {{data 'usuarios' 'pontosSaldo'}},\n    \"qrCode\": \"{{data 'usuarios' 'qrCode'}}\",\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\",\n    \"createdAt\": \"{{data 'usuarios' 'createdAt'}}\",\n    \"updatedAt\": \"{{data 'usuarios' 'updatedAt'}}\"\n  }\n}",
+          "body": "{{setVar 'novoNome' (bodyRaw 'name')}}{{#unless @novoNome}}{{setVar 'novoNome' (bodyRaw 'nome')}}{{/unless}}{{setVar 'novoEmail' (bodyRaw 'email')}}{{setVar 'novaSenha' (bodyRaw 'senha')}}{{#unless @novaSenha}}{{setVar 'novaSenha' (bodyRaw 'password')}}{{/unless}}{{setVar 'agora' (now)}}{{setVar 'novoId' (add (len (dataRaw 'usuariosCadastrados')) 1)}}{{setVar 'novoUsuario' (objectMerge (dataRaw 'usuarioDefault') (object id=@novoId name=@novoNome email=@novoEmail senha=@novaSenha createdAt=@agora updatedAt=@agora))}}{{setData 'push' 'usuariosCadastrados' '' @novoUsuario}}{\n  \"success\": true,\n  \"message\": \"Cadastro realizado com sucesso\",\n  \"data\": {\n    \"id\": {{@novoId}},\n    \"name\": \"{{@novoNome}}\",\n    \"email\": \"{{@novoEmail}}\",\n    \"pontosSaldo\": {{objectPath @novoUsuario 'pontosSaldo'}},\n    \"qrCode\": \"{{objectPath @novoUsuario 'qrCode'}}\",\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\",\n    \"createdAt\": \"{{@agora}}\",\n    \"updatedAt\": \"{{@agora}}\"\n  }\n}",
           "latency": 300,
           "statusCode": 201,
           "label": "Success",
@@ -89,7 +89,7 @@
       "responses": [
         {
           "uuid": "00000000-0000-0000-0000-100000000003",
-          "body": "{\n  \"success\": true,\n  \"data\": {{{stringify (dataRaw 'usuarios')}}}\n}",
+          "body": "{{setVar 'idAtual' (dataRaw 'usuarioAutenticadoAtual' 'idUsuarioAtual')}}{{setVar 'usuarioAtual' (find (dataRaw 'usuariosCadastrados') (object id=@idAtual))}}{\n  \"success\": true,\n  \"data\": {{{stringify @usuarioAtual}}}\n}",
           "latency": 150,
           "statusCode": 200,
           "label": "Success",
@@ -125,7 +125,7 @@
       "responses": [
         {
           "uuid": "00000000-0000-0000-0000-100000000004",
-          "body": "{\n  \"success\": true,\n  \"data\": {\n    \"pontosSaldo\": {{data 'usuarios' 'pontosSaldo'}},\n    \"pontosUtilizados\": {{data 'usuarios' 'pontosUtilizados'}},\n    \"totalPontosGanhos\": {{data 'usuarios' 'totalPontosGanhos'}},\n    \"pontosEmValidade\": {{{stringify (dataRaw 'usuarios' 'pontosEmValidade')}}},\n    \"createdAt\": \"{{data 'usuarios' 'createdAt'}}\",\n    \"updatedAt\": \"{{data 'usuarios' 'updatedAt'}}\"\n  }\n}",
+          "body": "{{setVar 'idAtual' (dataRaw 'usuarioAutenticadoAtual' 'idUsuarioAtual')}}{{setVar 'usuarioAtual' (find (dataRaw 'usuariosCadastrados') (object id=@idAtual))}}{\n  \"success\": true,\n  \"data\": {\n    \"pontosSaldo\": {{objectPath @usuarioAtual 'pontosSaldo'}},\n    \"pontosUtilizados\": {{objectPath @usuarioAtual 'pontosUtilizados'}},\n    \"totalPontosGanhos\": {{objectPath @usuarioAtual 'totalPontosGanhos'}},\n    \"createdAt\": \"{{objectPath @usuarioAtual 'createdAt'}}\",\n    \"updatedAt\": \"{{objectPath @usuarioAtual 'updatedAt'}}\"\n  }\n}",
           "latency": 150,
           "statusCode": 200,
           "label": "Success",
@@ -161,7 +161,7 @@
       "responses": [
         {
           "uuid": "00000000-0000-0000-0000-100000000005",
-          "body": "{\n  \"success\": true,\n  \"data\": {{{stringify (dataRaw 'movimentacoes')}}}\n}",
+          "body": "{{setVar 'idAtual' (dataRaw 'usuarioAutenticadoAtual' 'idUsuarioAtual')}}{{setVar 'usuarioAtual' (find (dataRaw 'usuariosCadastrados') (object id=@idAtual))}}{\n  \"success\": true,\n  \"data\": {{{stringify (objectPath @usuarioAtual 'movimentacoes')}}}\n}",
           "latency": 150,
           "statusCode": 200,
           "label": "Success",
@@ -189,16 +189,16 @@
       "streamingInterval": 0
     },
     {
-      "uuid": "00000000-0000-0000-0000-000000000006",
+      "uuid": "00000000-0000-0000-0000-000000000015",
       "type": "http",
-      "documentation": "Ultimas 10 movimentacoes",
-      "method": "get",
-      "endpoint": "pontos/extratoUltimos10",
+      "documentation": "Transferir pontos entre usuarios",
+      "method": "post",
+      "endpoint": "pontos/transferir",
       "responses": [
         {
-          "uuid": "00000000-0000-0000-0000-100000000006",
-          "body": "{\n  \"success\": true,\n  \"data\": {{{stringify (slice (dataRaw 'movimentacoes') 0 10)}}}\n}",
-          "latency": 150,
+          "uuid": "00000000-0000-0000-0000-100000000015",
+          "body": "{{setVar 'idAtual' (dataRaw 'usuarioAutenticadoAtual' 'idUsuarioAtual')}}{{setVar 'emailDestino' (bodyRaw 'emailDestino')}}{{#unless @emailDestino}}{{setVar 'emailDestino' (bodyRaw 'email')}}{{/unless}}{{setVar 'pontosTransferir' (bodyRaw 'valorPontos')}}{{#unless @pontosTransferir}}{{setVar 'pontosTransferir' (bodyRaw 'pontos')}}{{/unless}}{{#unless @pontosTransferir}}{{setVar 'pontosTransferir' (bodyRaw 'pontosTransferidos')}}{{/unless}}{{#unless @pontosTransferir}}{{setVar 'pontosTransferir' (bodyRaw 'quantidade')}}{{/unless}}{{setVar 'agora' (now)}}{{setVar 'usuarioAtual' (find (dataRaw 'usuariosCadastrados') (object id=@idAtual))}}{{setVar 'usuarioDestino' (find (dataRaw 'usuariosCadastrados') (object email=@emailDestino))}}{{setVar 'nomeAtual' (objectPath @usuarioAtual 'name')}}{{setVar 'saldoOrigem' (objectPath @usuarioAtual 'pontosSaldo')}}{{#if @usuarioAtual}}{{#if @usuarioDestino}}{{setVar 'idDestino' (objectPath @usuarioDestino 'id')}}{{setVar 'nomeDestino' (objectPath @usuarioDestino 'name')}}{{#if (eq @idDestino @idAtual)}}{{status 400}}{\n  \"success\": false,\n  \"message\": \"Nao e possivel transferir pontos para o proprio usuario\"\n}{{else}}{{#if (gt @pontosTransferir 0)}}{{#if (gte @saldoOrigem @pontosTransferir)}}{{#each (dataRaw 'usuariosCadastrados')}}{{#if (eq this.id @../idDestino)}}{{setVar 'saldoAtualDestino' (add this.pontosSaldo @../pontosTransferir)}}{{setVar 'proximoIdMovDestino' (add (len this.movimentacoes) 1)}}{{setData 'set' 'usuariosCadastrados' (concat @index '.pontosSaldo') @saldoAtualDestino}}{{setData 'inc' 'usuariosCadastrados' (concat @index '.totalPontosGanhos') @../pontosTransferir}}{{setData 'set' 'usuariosCadastrados' (concat @index '.updatedAt') @../agora}}{{setData 'push' 'usuariosCadastrados' (concat @index '.movimentacoes') (object id=@proximoIdMovDestino idUsuario=@../idDestino idProduto=null tipo='credito' valorPontos=@../pontosTransferir descricao=(concat 'Transferencia recebida de ' @../nomeAtual) data=(now 'yyyy-MM-dd') createdAt=@../agora updatedAt=@../agora)}}{{/if}}{{#if (eq this.id @../idAtual)}}{{setVar 'saldoAnteriorOrigem' this.pontosSaldo}}{{setVar 'saldoAtualOrigem' (subtract this.pontosSaldo @../pontosTransferir)}}{{setVar 'proximoIdMovOrigem' (add (len this.movimentacoes) 1)}}{{setData 'set' 'usuariosCadastrados' (concat @index '.pontosSaldo') @saldoAtualOrigem}}{{setData 'inc' 'usuariosCadastrados' (concat @index '.pontosUtilizados') @../pontosTransferir}}{{setData 'set' 'usuariosCadastrados' (concat @index '.updatedAt') @../agora}}{{setData 'push' 'usuariosCadastrados' (concat @index '.movimentacoes') (object id=@proximoIdMovOrigem idUsuario=@../idAtual idProduto=null tipo='debito' valorPontos=@../pontosTransferir descricao=(concat 'Transferencia enviada para ' @../nomeDestino) data=(now 'yyyy-MM-dd') createdAt=@../agora updatedAt=@../agora)}}{\n  \"success\": true,\n  \"message\": \"Transferencia realizada com sucesso\",\n  \"data\": {\n    \"idUsuarioOrigem\": {{@../idAtual}},\n    \"nomeUsuarioOrigem\": \"{{@../nomeAtual}}\",\n    \"idUsuarioDestino\": {{@../idDestino}},\n    \"nomeUsuarioDestino\": \"{{@../nomeDestino}}\",\n    \"emailDestino\": \"{{@../emailDestino}}\",\n    \"pontosTransferidos\": {{@../pontosTransferir}},\n    \"pontosSaldoAnteriorOrigem\": {{@saldoAnteriorOrigem}},\n    \"pontosSaldoAtualOrigem\": {{@saldoAtualOrigem}},\n    \"createdAt\": \"{{@../agora}}\"\n  }\n}{{/if}}{{/each}}{{else}}{{status 400}}{\n  \"success\": false,\n  \"message\": \"Saldo de pontos insuficiente para realizar a transferencia\",\n  \"debug\": {\n    \"pontosSolicitados\": {{@pontosTransferir}},\n    \"pontosSaldoAtual\": {{@saldoOrigem}}\n  }\n}{{/if}}{{else}}{{status 400}}{\n  \"success\": false,\n  \"message\": \"Informe uma quantidade de pontos maior que zero no campo valorPontos\",\n  \"debug\": {\n    \"valorRecebido\": {{#if @pontosTransferir}}{{@pontosTransferir}}{{else}}null{{/if}},\n    \"camposAceitos\": [\"valorPontos\", \"pontos\", \"pontosTransferidos\", \"quantidade\"]\n  }\n}{{/if}}{{/if}}{{else}}{{status 404}}{\n  \"success\": false,\n  \"message\": \"Usuario destinatario nao encontrado\",\n  \"debug\": {\n    \"emailDestinoRecebido\": \"{{@emailDestino}}\"\n  }\n}{{/if}}{{else}}{{status 401}}{\n  \"success\": false,\n  \"message\": \"Usuario de origem nao autenticado. Faca login antes de transferir pontos\"\n}{{/if}}",
+          "latency": 250,
           "statusCode": 200,
           "label": "Success",
           "headers": [
@@ -234,42 +234,6 @@
         {
           "uuid": "00000000-0000-0000-0000-100000000007",
           "body": "{\n  \"success\": true,\n  \"data\": [\n    {\"id\": 1, \"name\": \"Drogasil\", \"endereco\": \"Av. Paulista, 1520\", \"latitude\": -23.561684, \"longitude\": -46.656139, \"telefone\": \"(11) 4002-8922\", \"distancia\": \"1.9 km\", \"createdAt\": \"2025-01-10T10:00:00Z\", \"updatedAt\": \"2026-08-10T09:00:00Z\"},\n    {\"id\": 2, \"name\": \"Ultrafarma\", \"endereco\": \"Av. Jabaquara, 1548\", \"latitude\": -23.616671, \"longitude\": -46.640822, \"telefone\": \"(11) 5079-6100\", \"distancia\": \"3.2 km\", \"createdAt\": \"2025-01-10T10:00:00Z\", \"updatedAt\": \"2026-08-10T09:00:00Z\"},\n    {\"id\": 3, \"name\": \"Farmacia do Povo\", \"endereco\": \"Rua Vergueiro, 1087\", \"latitude\": -23.582999, \"longitude\": -46.635952, \"telefone\": \"(11) 3555-9090\", \"distancia\": \"2.4 km\", \"createdAt\": \"2025-01-10T10:00:00Z\", \"updatedAt\": \"2026-08-10T09:00:00Z\"}\n  ]\n}",
-          "latency": 150,
-          "statusCode": 200,
-          "label": "Success",
-          "headers": [
-            {
-              "key": "Content-Type",
-              "value": "application/json"
-            }
-          ],
-          "bodyType": "INLINE",
-          "filePath": "",
-          "databucketID": "",
-          "sendFileAsBody": false,
-          "rules": [],
-          "rulesOperator": "OR",
-          "disableTemplating": false,
-          "fallbackTo404": false,
-          "default": true,
-          "crudKey": "id",
-          "callbacks": []
-        }
-      ],
-      "responseMode": null,
-      "streamingMode": null,
-      "streamingInterval": 0
-    },
-    {
-      "uuid": "00000000-0000-0000-0000-000000000008",
-      "type": "http",
-      "documentation": "Parceiros filtro",
-      "method": "get",
-      "endpoint": "parceiros/filtro",
-      "responses": [
-        {
-          "uuid": "00000000-0000-0000-0000-100000000008",
-          "body": "{\n  \"success\": true,\n  \"data\": [\n    {\"id\": 1, \"name\": \"Drogasil\", \"endereco\": \"Av. Paulista, 1520\", \"latitude\": -23.561684, \"longitude\": -46.656139, \"telefone\": \"(11) 4002-8922\", \"distancia\": \"1.9 km\", \"createdAt\": \"2025-01-10T10:00:00Z\", \"updatedAt\": \"2026-08-10T09:00:00Z\"},\n    {\"id\": 3, \"name\": \"Farmacia do Povo\", \"endereco\": \"Rua Vergueiro, 1087\", \"latitude\": -23.582999, \"longitude\": -46.635952, \"telefone\": \"(11) 3555-9090\", \"distancia\": \"2.4 km\", \"createdAt\": \"2025-01-10T10:00:00Z\", \"updatedAt\": \"2026-08-10T09:00:00Z\"}\n  ],\n  \"filtro\": \"Farmacias proximas\"\n}",
           "latency": 150,
           "statusCode": 200,
           "label": "Success",
@@ -333,42 +297,6 @@
       "streamingInterval": 0
     },
     {
-      "uuid": "00000000-0000-0000-0000-000000000010",
-      "type": "http",
-      "documentation": "Produto filtro",
-      "method": "get",
-      "endpoint": "produto/filtro",
-      "responses": [
-        {
-          "uuid": "00000000-0000-0000-0000-100000000010",
-          "body": "{\n  \"success\": true,\n  \"data\": [\n    {\"id\": 1, \"name\": \"Dipirona 1g 10 comprimidos\", \"descricao\": \"Analgesico generico - parceiro Drogasil\", \"valorPontos\": 120, \"idCategoria\": 1, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n    {\"id\": 5, \"name\": \"Vitamina C efervescente 10 comprimidos\", \"descricao\": \"Suplemento diario - parceiro Ultrafarma\", \"valorPontos\": 220, \"idCategoria\": 2, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n    {\"id\": 11, \"name\": \"Shampoo anticaspa 200ml\", \"descricao\": \"Cuidado capilar - parceiro Farmacia do Povo\", \"valorPontos\": 280, \"idCategoria\": 3, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"}\n  ],\n  \"filtro\": \"Farmacia - baixo e medio valor de pontos\"\n}",
-          "latency": 150,
-          "statusCode": 200,
-          "label": "Success",
-          "headers": [
-            {
-              "key": "Content-Type",
-              "value": "application/json"
-            }
-          ],
-          "bodyType": "INLINE",
-          "filePath": "",
-          "databucketID": "",
-          "sendFileAsBody": false,
-          "rules": [],
-          "rulesOperator": "OR",
-          "disableTemplating": false,
-          "fallbackTo404": false,
-          "default": true,
-          "crudKey": "id",
-          "callbacks": []
-        }
-      ],
-      "responseMode": null,
-      "streamingMode": null,
-      "streamingInterval": 0
-    },
-    {
       "uuid": "00000000-0000-0000-0000-000000000011",
       "type": "http",
       "documentation": "Criar resgate",
@@ -377,81 +305,9 @@
       "responses": [
         {
           "uuid": "00000000-0000-0000-0000-100000000011",
-          "body": "{\n  \"success\": true,\n  \"message\": \"Resgate criado com sucesso\",\n  \"data\": {\n    \"idResgate\": 1,\n    \"idUsuario\": {{data 'usuarios' 'idUsuario'}},\n    \"idProduto\": 14,\n    \"nomeProduto\": \"Protetor solar FPS 50 120ml\",\n    \"pontosUtilizados\": 620,\n    \"status\": \"pendente\",\n    \"dataCriacao\": \"2026-08-10T09:20:00Z\",\n    \"dataConfirmacao\": null,\n    \"createdAt\": \"2026-08-10T09:20:00Z\",\n    \"updatedAt\": \"2026-08-10T09:20:00Z\"\n  }\n}",
+          "body": "{{setVar 'idProdutoResgate' (bodyRaw 'idProduto')}}{{setVar 'produto' (find (dataRaw 'produtos') (object id=@idProdutoResgate))}}{{setVar 'agora' (now)}}{{setVar 'idAtual' (dataRaw 'usuarioAutenticadoAtual' 'idUsuarioAtual')}}{{#if @produto}}{{setVar 'valorPontosResgate' (objectPath @produto 'valorPontos')}}{{setVar 'nomeProdutoResgate' (objectPath @produto 'name')}}{{#each (dataRaw 'usuariosCadastrados')}}{{#if (eq this.id @../idAtual)}}{{setVar 'saldoAnterior' this.pontosSaldo}}{{setVar 'saldoAtual' (subtract @saldoAnterior @../valorPontosResgate)}}{{setVar 'proximoIdMov' (add (len this.movimentacoes) 1)}}{{setData 'set' 'usuariosCadastrados' (concat @index '.pontosSaldo') @saldoAtual}}{{setData 'inc' 'usuariosCadastrados' (concat @index '.pontosUtilizados') @../valorPontosResgate}}{{setData 'set' 'usuariosCadastrados' (concat @index '.updatedAt') @../agora}}{{setData 'push' 'usuariosCadastrados' (concat @index '.movimentacoes') (object id=@proximoIdMov idUsuario=@../idAtual idProduto=@../idProdutoResgate tipo='debito' valorPontos=@../valorPontosResgate descricao=(concat 'Resgate solicitado: ' @../nomeProdutoResgate) data=(now 'yyyy-MM-dd') createdAt=@../agora updatedAt=@../agora)}}{\n  \"success\": true,\n  \"message\": \"Resgate criado com sucesso\",\n  \"data\": {\n    \"idResgate\": {{int 1000 9999}},\n    \"idUsuario\": {{@../idAtual}},\n    \"idProduto\": {{@../idProdutoResgate}},\n    \"nomeProduto\": \"{{@../nomeProdutoResgate}}\",\n    \"pontosUtilizados\": {{@../valorPontosResgate}},\n    \"pontosSaldoAnterior\": {{@saldoAnterior}},\n    \"pontosSaldoAtual\": {{@saldoAtual}},\n    \"status\": \"pendente\",\n    \"dataCriacao\": \"{{@../agora}}\",\n    \"dataConfirmacao\": null,\n    \"createdAt\": \"{{@../agora}}\",\n    \"updatedAt\": \"{{@../agora}}\"\n  }\n}{{/if}}{{/each}}{{else}}{{status 404}}{\n  \"success\": false,\n  \"message\": \"Produto não encontrado para o resgate informado\"\n}{{/if}}",
           "latency": 250,
           "statusCode": 201,
-          "label": "Success",
-          "headers": [
-            {
-              "key": "Content-Type",
-              "value": "application/json"
-            }
-          ],
-          "bodyType": "INLINE",
-          "filePath": "",
-          "databucketID": "",
-          "sendFileAsBody": false,
-          "rules": [],
-          "rulesOperator": "OR",
-          "disableTemplating": false,
-          "fallbackTo404": false,
-          "default": true,
-          "crudKey": "id",
-          "callbacks": []
-        }
-      ],
-      "responseMode": null,
-      "streamingMode": null,
-      "streamingInterval": 0
-    },
-    {
-      "uuid": "00000000-0000-0000-0000-000000000012",
-      "type": "http",
-      "documentation": "Confirmar resgate",
-      "method": "put",
-      "endpoint": "resgate/:id/confirmar",
-      "responses": [
-        {
-          "uuid": "00000000-0000-0000-0000-100000000012",
-          "body": "{{setVar 'pontosDebito' (body 'pontosUtilizados')}}{{setVar 'nomeProduto' (body 'nomeProduto')}}{{setVar 'idProdutoResgate' (body 'idProduto')}}{{setVar 'saldoAnterior' (data 'usuarios' 'pontosSaldo')}}{{setVar 'saldoAtual' (subtract @saldoAnterior @pontosDebito)}}{{setData 'set' 'usuarios' 'pontosSaldo' @saldoAtual}}{{setData 'inc' 'usuarios' 'pontosUtilizados' @pontosDebito}}{{setData 'set' 'usuarios' 'updatedAt' '2026-08-10T09:25:00Z'}}{{setData 'push' 'movimentacoes' '' (object id=(add (len (dataRaw 'movimentacoes')) 1) idUsuario=(data 'usuarios' 'idUsuario') idProduto=@idProdutoResgate tipo='debito' valorPontos=@pontosDebito descricao=(concat 'Resgate confirmado: ' @nomeProduto) data='2026-08-10' createdAt='2026-08-10T09:25:00Z' updatedAt='2026-08-10T09:25:00Z')}}{\n  \"success\": true,\n  \"message\": \"Resgate confirmado com sucesso\",\n  \"data\": {\n    \"idResgate\": {{urlParam 'id'}},\n    \"idUsuario\": {{data 'usuarios' 'idUsuario'}},\n    \"idProduto\": {{@idProdutoResgate}},\n    \"nomeProduto\": \"{{@nomeProduto}}\",\n    \"pontosUtilizados\": {{@pontosDebito}},\n    \"pontosSaldoAnterior\": {{@saldoAnterior}},\n    \"pontosSaldoAtual\": {{@saldoAtual}},\n    \"status\": \"confirmado\",\n    \"dataConfirmacao\": \"2026-08-10T09:25:00Z\",\n    \"createdAt\": \"2026-08-10T09:20:00Z\",\n    \"updatedAt\": \"2026-08-10T09:25:00Z\"\n  }\n}",
-          "latency": 250,
-          "statusCode": 200,
-          "label": "Success",
-          "headers": [
-            {
-              "key": "Content-Type",
-              "value": "application/json"
-            }
-          ],
-          "bodyType": "INLINE",
-          "filePath": "",
-          "databucketID": "",
-          "sendFileAsBody": false,
-          "rules": [],
-          "rulesOperator": "OR",
-          "disableTemplating": false,
-          "fallbackTo404": false,
-          "default": true,
-          "crudKey": "id",
-          "callbacks": []
-        }
-      ],
-      "responseMode": null,
-      "streamingMode": null,
-      "streamingInterval": 0
-    },
-    {
-      "uuid": "00000000-0000-0000-0000-000000000013",
-      "type": "http",
-      "documentation": "Listar resgates",
-      "method": "get",
-      "endpoint": "resgate",
-      "responses": [
-        {
-          "uuid": "00000000-0000-0000-0000-100000000013",
-          "body": "{\n  \"success\": true,\n  \"data\": [\n    {\"idResgate\": 1, \"idUsuario\": {{data 'usuarios' 'idUsuario'}}, \"idProduto\": 14, \"nomeProduto\": \"Protetor solar FPS 50 120ml\", \"pontosUtilizados\": 620, \"status\": \"confirmado\", \"dataCriacao\": \"2026-08-10T09:20:00Z\", \"dataConfirmacao\": \"2026-08-10T09:25:00Z\", \"createdAt\": \"2026-08-10T09:20:00Z\", \"updatedAt\": \"2026-08-10T09:25:00Z\"}\n  ]\n}",
-          "latency": 150,
-          "statusCode": 200,
           "label": "Success",
           "headers": [
             {
@@ -485,7 +341,7 @@
       "responses": [
         {
           "uuid": "00000000-0000-0000-0000-100000000014",
-          "body": "{{setVar 'pontosCredito' (body 'pontosBonificados')}}{{setVar 'idProdutoMov' (body 'idProduto')}}{{setVar 'saldoAnterior' (data 'usuarios' 'pontosSaldo')}}{{setVar 'saldoAtual' (add @saldoAnterior @pontosCredito)}}{{setData 'set' 'usuarios' 'pontosSaldo' @saldoAtual}}{{setData 'inc' 'usuarios' 'totalPontosGanhos' @pontosCredito}}{{setData 'set' 'usuarios' 'updatedAt' '2026-08-10T09:30:00Z'}}{{setData 'push' 'movimentacoes' '' (object id=(add (len (dataRaw 'movimentacoes')) 1) idUsuario=(data 'usuarios' 'idUsuario') idProduto=@idProdutoMov tipo='credito' valorPontos=@pontosCredito descricao='Bonificacao de pontos por compra em parceiro farmaceutico' data='2026-08-10' createdAt='2026-08-10T09:30:00Z' updatedAt='2026-08-10T09:30:00Z')}}{\n  \"success\": true,\n  \"message\": \"Pontos bonificados com sucesso\",\n  \"data\": {\n    \"idUsuario\": {{data 'usuarios' 'idUsuario'}},\n    \"idEstabelecimento\": {{urlParam 'id'}},\n    \"idProduto\": {{@idProdutoMov}},\n    \"pontosBonificados\": {{@pontosCredito}},\n    \"pontosSaldoAnterior\": {{@saldoAnterior}},\n    \"pontosSaldoAtual\": {{@saldoAtual}},\n    \"nomeEstabelecimento\": \"Drogasil\",\n    \"motivo\": \"Compra bonificada em parceiro de farmacia\",\n    \"createdAt\": \"2026-08-10T09:30:00Z\",\n    \"updatedAt\": \"2026-08-10T09:30:00Z\"\n  }\n}",
+          "body": "{{setVar 'pontosCredito' (bodyRaw 'pontosBonificados')}}{{setVar 'idProdutoMov' (bodyRaw 'idProduto')}}{{setVar 'agora' (now)}}{{setVar 'idAtual' (dataRaw 'usuarioAutenticadoAtual' 'idUsuarioAtual')}}{{#each (dataRaw 'usuariosCadastrados')}}{{#if (eq this.id @../idAtual)}}{{setVar 'saldoAnterior' this.pontosSaldo}}{{setVar 'saldoAtual' (add @saldoAnterior @../pontosCredito)}}{{setVar 'proximoIdMov' (add (len this.movimentacoes) 1)}}{{setData 'set' 'usuariosCadastrados' (concat @index '.pontosSaldo') @saldoAtual}}{{setData 'inc' 'usuariosCadastrados' (concat @index '.totalPontosGanhos') @../pontosCredito}}{{setData 'set' 'usuariosCadastrados' (concat @index '.updatedAt') @../agora}}{{setData 'push' 'usuariosCadastrados' (concat @index '.movimentacoes') (object id=@proximoIdMov idUsuario=@../idAtual idProduto=@../idProdutoMov tipo='credito' valorPontos=@../pontosCredito descricao='Bonificacao de pontos por compra em parceiro farmaceutico' data=(now 'yyyy-MM-dd') createdAt=@../agora updatedAt=@../agora)}}{\n  \"success\": true,\n  \"message\": \"Pontos bonificados com sucesso\",\n  \"data\": {\n    \"idUsuario\": {{@../idAtual}},\n    \"idEstabelecimento\": {{urlParam 'id'}},\n    \"idProduto\": {{@../idProdutoMov}},\n    \"pontosBonificados\": {{@../pontosCredito}},\n    \"pontosSaldoAnterior\": {{@saldoAnterior}},\n    \"pontosSaldoAtual\": {{@saldoAtual}},\n    \"nomeEstabelecimento\": \"Drogasil\",\n    \"motivo\": \"Compra bonificada em parceiro de farmacia\",\n    \"createdAt\": \"{{@../agora}}\",\n    \"updatedAt\": \"{{@../agora}}\"\n  }\n}{{/if}}{{/each}}",
           "latency": 250,
           "statusCode": 200,
           "label": "Success",
@@ -536,7 +392,7 @@
     },
     {
       "type": "route",
-      "uuid": "00000000-0000-0000-0000-000000000006"
+      "uuid": "00000000-0000-0000-0000-000000000015"
     },
     {
       "type": "route",
@@ -544,27 +400,11 @@
     },
     {
       "type": "route",
-      "uuid": "00000000-0000-0000-0000-000000000008"
-    },
-    {
-      "type": "route",
       "uuid": "00000000-0000-0000-0000-000000000009"
     },
     {
       "type": "route",
-      "uuid": "00000000-0000-0000-0000-000000000010"
-    },
-    {
-      "type": "route",
       "uuid": "00000000-0000-0000-0000-000000000011"
-    },
-    {
-      "type": "route",
-      "uuid": "00000000-0000-0000-0000-000000000012"
-    },
-    {
-      "type": "route",
-      "uuid": "00000000-0000-0000-0000-000000000013"
     },
     {
       "type": "route",
@@ -617,17 +457,10 @@
   "data": [
     {
       "uuid": "d9924b22-69ec-4e75-b3f8-c9b3132af801",
-      "id": "usuarios",
-      "name": "Usuarios",
-      "documentation": "Dados do usuario para cadastro, login e meus dados",
-      "value": "{\n  \"idUsuario\": 1,\n  \"name\": \"Joao Silva\",\n  \"email\": \"joao@example.com\",\n  \"senha\": \"123456\",\n  \"telefone\": \"(11) 98765-4321\",\n  \"cpf\": \"123.456.789-10\",\n  \"dataNascimento\": \"1993-09-20\",\n  \"genero\": \"masculino\",\n  \"endereco\": {\n    \"logradouro\": \"Rua das Flores\",\n    \"numero\": \"150\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"Sao Paulo\",\n    \"uf\": \"SP\",\n    \"cep\": \"01010-000\"\n  },\n  \"ativo\": true,\n  \"qrCode\": \"QR123456789\",\n  \"nivelMembro\": \"Prata\",\n  \"dataRegistro\": \"2024-06-15\",\n  \"ultimoAcesso\": \"2026-08-10T08:50:00Z\",\n  \"pontosSaldo\": 1800,\n  \"pontosUtilizados\": 720,\n  \"totalPontosGanhos\": 2520,\n  \"createdAt\": \"2024-06-15T09:00:00Z\",\n  \"updatedAt\": \"2026-08-10T08:50:00Z\",\n  \"pontosEmValidade\": [\n    {\"valor\": 400, \"dataExpiracao\": \"2026-10-31\", \"createdAt\": \"2026-01-01T00:00:00Z\", \"updatedAt\": \"2026-01-01T00:00:00Z\"},\n    {\"valor\": 250, \"dataExpiracao\": \"2026-12-31\", \"createdAt\": \"2026-03-01T00:00:00Z\", \"updatedAt\": \"2026-03-01T00:00:00Z\"}\n  ]\n}"
-    },
-    {
-      "uuid": "1c4fa881-e6c6-4ed0-acfd-98e3b14954f2",
-      "id": "movimentacoes",
-      "name": "Movimentacoes",
-      "documentation": "Movimentacoes de credito e debito com idUsuario obrigatorio e idProduto opcional",
-      "value": "[\n  {\"id\": 1, \"idUsuario\": 1, \"idProduto\": 2, \"tipo\": \"credito\", \"valorPontos\": 180, \"descricao\": \"Bonificacao por compra em Drogasil\", \"data\": \"2026-08-01\", \"createdAt\": \"2026-08-01T10:10:00Z\", \"updatedAt\": \"2026-08-01T10:10:00Z\"},\n  {\"id\": 2, \"idUsuario\": 1, \"idProduto\": 14, \"tipo\": \"debito\", \"valorPontos\": 620, \"descricao\": \"Resgate confirmado: Protetor solar FPS 50 120ml\", \"data\": \"2026-08-02\", \"createdAt\": \"2026-08-02T11:30:00Z\", \"updatedAt\": \"2026-08-02T11:30:00Z\"},\n  {\"id\": 3, \"idUsuario\": 1, \"idProduto\": 6, \"tipo\": \"credito\", \"valorPontos\": 150, \"descricao\": \"Bonificacao por compra em Ultrafarma\", \"data\": \"2026-08-03\", \"createdAt\": \"2026-08-03T09:25:00Z\", \"updatedAt\": \"2026-08-03T09:25:00Z\"},\n  {\"id\": 4, \"idUsuario\": 1, \"idProduto\": 9, \"tipo\": \"debito\", \"valorPontos\": 320, \"descricao\": \"Resgate confirmado: Fio dental 50m\", \"data\": \"2026-08-04\", \"createdAt\": \"2026-08-04T12:45:00Z\", \"updatedAt\": \"2026-08-04T12:45:00Z\"},\n  {\"id\": 5, \"idUsuario\": 1, \"idProduto\": 18, \"tipo\": \"credito\", \"valorPontos\": 210, \"descricao\": \"Bonificacao por compra em Farmacia do Povo\", \"data\": \"2026-08-05\", \"createdAt\": \"2026-08-05T15:20:00Z\", \"updatedAt\": \"2026-08-05T15:20:00Z\"}\n]"
+      "id": "usuarioAutenticadoAtual",
+      "name": "UsuarioAutenticadoAtual",
+      "documentation": "Usuario autenticado atual para meus dados e saldo em sessao",
+      "value": "{\n  \"idUsuarioAtual\": 1\n}"
     },
     {
       "uuid": "7ed80f07-c32f-4d10-8768-3704aa298871",
@@ -635,6 +468,20 @@
       "name": "Produtos",
       "documentation": "Catalogo de produtos de farmacia para resgate",
       "value": "[\n  {\"id\": 1, \"name\": \"Dipirona 1g 10 comprimidos\", \"descricao\": \"Analgesico generico - parceiro Drogasil\", \"valorPontos\": 120, \"idCategoria\": 1, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n  {\"id\": 2, \"name\": \"Paracetamol 750mg 20 comprimidos\", \"descricao\": \"Analgesico e antitermico - parceiro Drogasil\", \"valorPontos\": 180, \"idCategoria\": 1, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n  {\"id\": 3, \"name\": \"Ibuprofeno 400mg 20 comprimidos\", \"descricao\": \"Anti-inflamatorio nao esteroidal - parceiro Ultrafarma\", \"valorPontos\": 210, \"idCategoria\": 2, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n  {\"id\": 4, \"name\": \"Loratadina 10mg 12 comprimidos\", \"descricao\": \"Antialergico de uso diario - parceiro Farmacia do Povo\", \"valorPontos\": 240, \"idCategoria\": 3, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n  {\"id\": 5, \"name\": \"Vitamina C efervescente 10 comprimidos\", \"descricao\": \"Suplemento diario - parceiro Ultrafarma\", \"valorPontos\": 220, \"idCategoria\": 2, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n  {\"id\": 6, \"name\": \"Polivitaminico adulto 60 capsulas\", \"descricao\": \"Suplementacao mensal - parceiro Ultrafarma\", \"valorPontos\": 460, \"idCategoria\": 2, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n  {\"id\": 7, \"name\": \"Fralda geriatrica M pacote 8 unidades\", \"descricao\": \"Cuidado diario - parceiro Drogasil\", \"valorPontos\": 390, \"idCategoria\": 1, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n  {\"id\": 8, \"name\": \"Sabonete liquido antisseptico 250ml\", \"descricao\": \"Higiene e protecao - parceiro Farmacia do Povo\", \"valorPontos\": 170, \"idCategoria\": 3, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n  {\"id\": 9, \"name\": \"Fio dental 50m\", \"descricao\": \"Higiene bucal diaria - parceiro Farmacia do Povo\", \"valorPontos\": 320, \"idCategoria\": 3, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n  {\"id\": 10, \"name\": \"Enxaguante bucal sem alcool 500ml\", \"descricao\": \"Cuidado bucal completo - parceiro Drogasil\", \"valorPontos\": 290, \"idCategoria\": 1, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n  {\"id\": 11, \"name\": \"Shampoo anticaspa 200ml\", \"descricao\": \"Cuidado capilar - parceiro Farmacia do Povo\", \"valorPontos\": 280, \"idCategoria\": 3, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n  {\"id\": 12, \"name\": \"Condicionador hidratante 200ml\", \"descricao\": \"Cuidado capilar diario - parceiro Ultrafarma\", \"valorPontos\": 270, \"idCategoria\": 2, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n  {\"id\": 13, \"name\": \"Desodorante aerosol 150ml\", \"descricao\": \"Higiene pessoal - parceiro Drogasil\", \"valorPontos\": 260, \"idCategoria\": 1, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n  {\"id\": 14, \"name\": \"Protetor solar FPS 50 120ml\", \"descricao\": \"Protecao diaria UVA/UVB - parceiro Drogasil\", \"valorPontos\": 620, \"idCategoria\": 1, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n  {\"id\": 15, \"name\": \"Repelente spray 200ml\", \"descricao\": \"Protecao contra insetos - parceiro Ultrafarma\", \"valorPontos\": 300, \"idCategoria\": 2, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n  {\"id\": 16, \"name\": \"Termometro digital\", \"descricao\": \"Monitoramento de temperatura corporal - parceiro Farmacia do Povo\", \"valorPontos\": 520, \"idCategoria\": 3, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n  {\"id\": 17, \"name\": \"Aparelho de pressao digital de braco\", \"descricao\": \"Monitoramento domestico - parceiro Ultrafarma\", \"valorPontos\": 1450, \"idCategoria\": 2, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n  {\"id\": 18, \"name\": \"Nebulizador inalador\", \"descricao\": \"Suporte respiratorio residencial - parceiro Farmacia do Povo\", \"valorPontos\": 1690, \"idCategoria\": 3, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n  {\"id\": 19, \"name\": \"Kit curativo 35 itens\", \"descricao\": \"Primeiros socorros para casa - parceiro Drogasil\", \"valorPontos\": 680, \"idCategoria\": 1, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"},\n  {\"id\": 20, \"name\": \"Mascara cirurgica caixa 50 unidades\", \"descricao\": \"Protecao respiratoria - parceiro Ultrafarma\", \"valorPontos\": 340, \"idCategoria\": 2, \"createdAt\": \"2026-08-10T09:00:00Z\", \"updateAt\": \"2026-08-10T09:00:00Z\"}\n]"
+    },
+    {
+      "uuid": "a1b2c3d4-1111-4a2b-9c3d-000000000099",
+      "id": "usuariosCadastrados",
+      "name": "UsuariosCadastrados",
+      "documentation": "Lista de todos os usuarios cadastrados (usada para cadastro e busca no login)",
+      "value": "[\n  {\n    \"id\": 1,\n    \"name\": \"Joao Silva\",\n    \"email\": \"joao@example.com\",\n    \"senha\": \"123456\",\n    \"telefone\": \"(11) 98765-4321\",\n    \"cpf\": \"123.456.789-10\",\n    \"dataNascimento\": \"1993-09-20\",\n    \"genero\": \"masculino\",\n    \"endereco\": {\n      \"logradouro\": \"Rua das Flores\",\n      \"numero\": \"150\",\n      \"bairro\": \"Centro\",\n      \"cidade\": \"Sao Paulo\",\n      \"uf\": \"SP\",\n      \"cep\": \"01010-000\"\n    },\n    \"ativo\": true,\n    \"qrCode\": \"QR123456789\",\n    \"nivelMembro\": \"Prata\",\n    \"dataRegistro\": \"2024-06-15\",\n    \"ultimoAcesso\": \"2026-08-10T08:50:00Z\",\n    \"pontosSaldo\": 2200,\n    \"pontosUtilizados\": 0,\n    \"totalPontosGanhos\": 2800,\n    \"createdAt\": \"2024-06-15T09:00:00Z\",\n    \"updatedAt\": \"2026-08-10T08:50:00Z\",\n    \"movimentacoes\": [\n      {\n        \"id\": 1,\n        \"idUsuario\": 1,\n        \"idProduto\": 2,\n        \"tipo\": \"credito\",\n        \"valorPontos\": 2000,\n        \"descricao\": \"Bonificacao por compra em Drogasil\",\n        \"data\": \"2026-08-01\",\n        \"createdAt\": \"2026-08-01T10:10:00Z\",\n        \"updatedAt\": \"2026-08-01T10:10:00Z\"\n      },\n      {\n        \"id\": 2,\n        \"idUsuario\": 1,\n        \"idProduto\": 14,\n        \"tipo\": \"debito\",\n        \"valorPontos\": 600,\n        \"descricao\": \"Resgate confirmado: Protetor solar FPS 50 120ml\",\n        \"data\": \"2026-08-02\",\n        \"createdAt\": \"2026-08-02T11:30:00Z\",\n        \"updatedAt\": \"2026-08-02T11:30:00Z\"\n      },\n      {\n        \"id\": 3,\n        \"idUsuario\": 1,\n        \"idProduto\": 6,\n        \"tipo\": \"credito\",\n        \"valorPontos\": 800,\n        \"descricao\": \"Bonificacao por compra em Ultrafarma\",\n        \"data\": \"2026-08-03\",\n        \"createdAt\": \"2026-08-03T09:25:00Z\",\n        \"updatedAt\": \"2026-08-03T09:25:00Z\"\n      }\n    ]\n  }\n]"
+    },
+    {
+      "uuid": "00000000-0000-0000-0000-200000000001",
+      "id": "usuarioDefault",
+      "name": "UsuarioDefault",
+      "documentation": "Perfil padrao usado como base para clonar novos cadastros (nome/email/senha/datas sao sobrescritos)",
+      "value": "{\n  \"id\": 1,\n  \"name\": \"Joao Silva\",\n  \"email\": \"joao@example.com\",\n  \"senha\": \"123456\",\n  \"telefone\": \"(11) 98765-4321\",\n  \"cpf\": \"123.456.789-10\",\n  \"dataNascimento\": \"1993-09-20\",\n  \"genero\": \"masculino\",\n  \"endereco\": {\n    \"logradouro\": \"Rua das Flores\",\n    \"numero\": \"150\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"Sao Paulo\",\n    \"uf\": \"SP\",\n    \"cep\": \"01010-000\"\n  },\n  \"ativo\": true,\n  \"qrCode\": \"QR123456789\",\n  \"nivelMembro\": \"Prata\",\n  \"dataRegistro\": \"2024-06-15\",\n  \"ultimoAcesso\": \"2026-08-10T08:50:00Z\",\n  \"pontosSaldo\": 2200,\n  \"pontosUtilizados\": 0,\n  \"totalPontosGanhos\": 2800,\n  \"createdAt\": \"2024-06-15T09:00:00Z\",\n  \"updatedAt\": \"2026-08-10T08:50:00Z\",\n  \"movimentacoes\": [\n    {\n      \"id\": 1,\n      \"idUsuario\": 1,\n      \"idProduto\": 2,\n      \"tipo\": \"credito\",\n      \"valorPontos\": 2000,\n      \"descricao\": \"Bonificacao por compra em Drogasil\",\n      \"data\": \"2026-08-01\",\n      \"createdAt\": \"2026-08-01T10:10:00Z\",\n      \"updatedAt\": \"2026-08-01T10:10:00Z\"\n    },\n    {\n      \"id\": 2,\n      \"idUsuario\": 1,\n      \"idProduto\": 14,\n      \"tipo\": \"debito\",\n      \"valorPontos\": 600,\n      \"descricao\": \"Resgate confirmado: Protetor solar FPS 50 120ml\",\n      \"data\": \"2026-08-02\",\n      \"createdAt\": \"2026-08-02T11:30:00Z\",\n      \"updatedAt\": \"2026-08-02T11:30:00Z\"\n    },\n    {\n      \"id\": 3,\n      \"idUsuario\": 1,\n      \"idProduto\": 6,\n      \"tipo\": \"credito\",\n      \"valorPontos\": 800,\n      \"descricao\": \"Bonificacao por compra em Ultrafarma\",\n      \"data\": \"2026-08-03\",\n      \"createdAt\": \"2026-08-03T09:25:00Z\",\n      \"updatedAt\": \"2026-08-03T09:25:00Z\"\n    }\n  ]\n}"
     }
   ],
   "callbacks": []
