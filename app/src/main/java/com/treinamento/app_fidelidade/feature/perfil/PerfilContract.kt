@@ -10,7 +10,6 @@ data class PerfilUiState(
     val email: String = "",
     val endereco: String = "",
     val saldoPontos: Long = 0,
-    val qrCode: String = "",
     val offline: Boolean = false,
     val mensagem: String? = null
 )

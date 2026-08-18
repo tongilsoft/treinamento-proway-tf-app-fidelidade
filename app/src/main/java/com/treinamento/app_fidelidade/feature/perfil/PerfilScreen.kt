@@ -112,7 +112,8 @@ fun PerfilScreen(
 
                 item {
                     QrCodeCard(
-                        qrCode = state.qrCode,
+                        nome = state.nome,
+                        email = state.email,
                         usuarioId = state.usuarioId
                     )
                 }
@@ -162,20 +163,21 @@ private fun MeusDadosCard(
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                IconButton(onClick = onEditar, modifier = Modifier.size(24.dp)) {
+                /*IconButton(onClick = onEditar, modifier = Modifier.size(24.dp)) {
                     Icon(
                         imageVector = Icons.Default.Edit,
                         contentDescription = "Editar",
                         tint = MaterialTheme.colorScheme.onSurface
                     )
-                }
+                }*/
             }
             
             DadoItem("Nome", nome)
             DadoItem("E-mail", email)
-            DadoItem("Endereço", endereco)
+            // DadoItem("Endereço", endereco)
+            // Endereço ocultado temporariamente na UI de perfil. Caso precise reativar, basta descomentar esta linha.
             
-            Column {
+            /*Column {
                 Text(
                     text = "Senha",
                     style = MaterialTheme.typography.labelMedium,
@@ -202,7 +204,7 @@ private fun MeusDadosCard(
                         )
                     }
                 }
-            }
+            }*/
 
             Column {
                 Text(
@@ -223,9 +225,12 @@ private fun MeusDadosCard(
 
 @Composable
 private fun QrCodeCard(
-    qrCode: String,
+    nome: String,
+    email: String,
     usuarioId: Long
 ) {
+    val qrContent = "ID: $usuarioId\nNome: $nome\nE-mail: $email"
+    
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.elevatedCardColors(
@@ -255,8 +260,8 @@ private fun QrCodeCard(
                     )
                     .padding(4.dp) 
             ) {
-                if (qrCode.isNotBlank()) {
-                    val bitmap = remember(qrCode) { gerarQrCode(qrCode) }
+                if (nome.isNotBlank() && email.isNotBlank()) {
+                    val bitmap = remember(qrContent) { gerarQrCode(qrContent) }
                     Image(
                         bitmap = bitmap.asImageBitmap(),
                         contentDescription = "QR Code",

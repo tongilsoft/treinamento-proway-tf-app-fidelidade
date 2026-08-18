@@ -28,7 +28,6 @@ class PerfilViewModel(
             nome = usuario.nome,
             email = usuario.email,
             saldoPontos = usuario.pontosSaldo,
-            qrCode = usuario.qrCode,
             offline = c.offline,
             mensagem = c.mensagem
         )
