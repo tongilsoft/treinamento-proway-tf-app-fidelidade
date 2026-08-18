@@ -72,24 +72,17 @@ fun AuthenticationScreen(
     val errorMessage = viewModel.errorMessage
 
 
-    /*
-     * Este efeito será executado quando o usuário autenticado for alterado.
-     *
-     * A navegação só acontece depois que o backend retorna sucesso
-     * e o ViewModel atribui response.data para usuario.
-     */
     LaunchedEffect(authenticatedUser) {
+
         if (authenticatedUser != null) {
-            try {
-                navController.navigate(Rotas.FIDELIDADE) {
-                    popUpTo(Rotas.AUTHENTICATION) {
-                        inclusive = false
-                    }
-                    launchSingleTop = false
+
+            navController.navigate(Rotas.FIDELIDADE) {
+
+                popUpTo(Rotas.AUTHENTICATION) {
+                    inclusive = false
                 }
-            }catch (e: Exception){
-                println(e.message)
-                println("DEURUIN")
+
+                launchSingleTop = false
             }
         }
     }

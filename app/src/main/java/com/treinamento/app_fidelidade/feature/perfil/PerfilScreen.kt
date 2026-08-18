@@ -112,7 +112,8 @@ fun PerfilScreen(
 
                 item {
                     QrCodeCard(
-                        qrCode = state.qrCode,
+                        nome = state.nome,
+                        email = state.email,
                         usuarioId = state.usuarioId
                     )
                 }
@@ -224,9 +225,12 @@ private fun MeusDadosCard(
 
 @Composable
 private fun QrCodeCard(
-    qrCode: String,
+    nome: String,
+    email: String,
     usuarioId: Long
 ) {
+    val qrContent = "ID: $usuarioId\nNome: $nome\nE-mail: $email"
+    
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.elevatedCardColors(
@@ -256,8 +260,8 @@ private fun QrCodeCard(
                     )
                     .padding(4.dp) 
             ) {
-                if (qrCode.isNotBlank()) {
-                    val bitmap = remember(qrCode) { gerarQrCode(qrCode) }
+                if (nome.isNotBlank() && email.isNotBlank()) {
+                    val bitmap = remember(qrContent) { gerarQrCode(qrContent) }
                     Image(
                         bitmap = bitmap.asImageBitmap(),
                         contentDescription = "QR Code",
