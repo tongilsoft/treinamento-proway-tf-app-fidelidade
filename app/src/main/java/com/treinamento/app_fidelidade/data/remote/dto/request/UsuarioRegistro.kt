@@ -1,15 +1,16 @@
 package com.treinamento.app_fidelidade.data.remote.dto.request
 
 import java.math.BigInteger
-import java.time.LocalDateTime
 
 data class UsuarioRegistro(
     val id: BigInteger?,
     val name: String,
     val email: String,
+    // o mock aceita tanto "senha" quanto "password" neste campo
     val password: String,
     val pontosSaldo: BigInteger = BigInteger.ZERO,
     val qrCode: String?,
-    val createdAt: LocalDateTime?,
-    val updatedAt: LocalDateTime?
+    // datas chegam como texto ISO ("2026-08-18T00:44:44.288-03:00"); o Gson padrao nao converte LocalDateTime
+    val createdAt: String?,
+    val updatedAt: String?
 )

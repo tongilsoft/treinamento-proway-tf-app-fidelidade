@@ -14,6 +14,8 @@ data class Usuario(
     val token: String? = null,
     val pontosUtilizados: BigInteger? = null,
     val totalPontosGanhos: BigInteger? = null,
-    val nivelMembro: String? = null
+    val nivelMembro: String? = null,
+    val createdAt: String? = null,
+    val updatedAt: String? = null
 )
 
