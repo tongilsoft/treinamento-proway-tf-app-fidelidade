@@ -10,6 +10,7 @@ fun PerfilRoute(
     viewModel: PerfilViewModel,
     onNavigateToEditarPerfil: () -> Unit,
     onNavigateToAlterarSenha: () -> Unit,
+    onSairClick: () -> Unit,
     onNavigate: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -20,7 +21,7 @@ fun PerfilRoute(
         onEvent = viewModel::onEvent,
         onEditarClick = onNavigateToEditarPerfil,
         onAlterarSenhaClick = onNavigateToAlterarSenha,
-        onSairClick = { /* Sair logic */ },
+        onSairClick = onSairClick,
         onNavigate = onNavigate,
         modifier = modifier
     )
