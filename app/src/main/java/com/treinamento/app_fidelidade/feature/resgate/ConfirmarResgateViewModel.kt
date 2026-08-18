@@ -40,7 +40,7 @@ class ConfirmarResgateViewModel : ViewModel() {
     init {
         viewModelScope.launch {
             usuarioRepository.observarUsuario().collect { usuario ->
-                _uiState.update { it.copy(saldoPontos = usuario.saldoPontos) }
+                _uiState.update { it.copy(saldoPontos = usuario.pontosSaldo) }
             }
         }
     }

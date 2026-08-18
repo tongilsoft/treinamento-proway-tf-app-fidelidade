@@ -33,7 +33,7 @@ class CarrinhoViewModel : ViewModel() {
         CarrinhoUiState(
             carregando = false,
             itens = itens,
-            saldoPontos = usuario.saldoPontos
+            saldoPontos = usuario.pontosSaldo
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), CarrinhoUiState())
 

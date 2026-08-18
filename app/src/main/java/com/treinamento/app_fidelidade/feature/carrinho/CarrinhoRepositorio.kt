@@ -47,8 +47,8 @@ object CarrinhoRepositorio {
 
     // Itens fixos so para a tela ficar igual ao design na apresentacao.
     private fun itensMockados() = listOf(
-        ItemCarrinho(Produto(1, "Fone de Ouvido Bluetooth", "", 1_000, "Eletronicos", 100), 1),
-        ItemCarrinho(Produto(2, "Cafeteira Eletrica", "", 2_800, "Casa", 90), 1),
-        ItemCarrinho(Produto(3, "Caneca Termica", "", 600, "Acessorios", 80), 1)
+        ItemCarrinho(Produto(1, "Fone de Ouvido Bluetooth", "", 1_000, "Eletronicos", ""), 1),
+        ItemCarrinho(Produto(2, "Cafeteira Eletrica", "", 2_800, "Casa", ""), 1),
+        ItemCarrinho(Produto(3, "Caneca Termica", "", 600, "Acessorios", ""), 1)
     )
 }
