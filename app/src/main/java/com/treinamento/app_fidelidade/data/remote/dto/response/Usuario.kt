@@ -9,6 +9,8 @@ data class Usuario(
     val email: String,
     val pontosSaldo: BigInteger,
     val qrCode: String,
-    val token: String
+    val token: String,
+    // campos que o mock ja devolve em /auth/login e /auth/cadastro
+    val createdAt: String? = null,
+    val updatedAt: String? = null
 )
-

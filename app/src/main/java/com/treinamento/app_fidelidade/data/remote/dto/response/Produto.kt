@@ -1,7 +1,7 @@
 package com.treinamento.app_fidelidade.data.remote.dto.response
 
+import com.google.gson.annotations.SerializedName
 import java.math.BigInteger
-import java.time.LocalDateTime
 
 data class Produto(
     val id: BigInteger,
@@ -9,6 +9,9 @@ data class Produto(
     val descricao: String,
     val valorPontos: BigInteger,
     val idCategoria: BigInteger,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime
+    // datas chegam como texto ISO; o Gson padrao nao converte LocalDateTime
+    val createdAt: String? = null,
+    // o catalogo do mock envia a chave como "updateAt", sem o "d"
+    @SerializedName(value = "updatedAt", alternate = ["updateAt"])
+    val updatedAt: String? = null
 )
