@@ -4,9 +4,9 @@ import com.treinamento.app_fidelidade.data.remote.RetrofitInstance
 import com.treinamento.app_fidelidade.data.remote.api.FidelidadeApi
 import com.treinamento.app_fidelidade.data.remote.dto.request.ItemResgateRequest
 import com.treinamento.app_fidelidade.data.remote.dto.request.ResgateRequest
-import com.treinamento.app_fidelidade.data.remote.dto.response.Resgate
 import com.treinamento.app_fidelidade.data.remote.dto.response.MovimentacaoResponse
 import com.treinamento.app_fidelidade.data.remote.dto.response.PontosResponse
+import com.treinamento.app_fidelidade.data.remote.dto.response.Resgate
 import java.math.BigInteger
 
 class ResgateService(

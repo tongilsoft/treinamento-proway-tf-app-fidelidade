@@ -22,12 +22,12 @@ import com.treinamento.app_fidelidade.data.remote.dto.response.ResgateResponse
 import com.treinamento.app_fidelidade.data.remote.dto.response.SaldoPontosResponse
 import com.treinamento.app_fidelidade.data.remote.dto.response.TransferenciaPontosResponse
 import com.treinamento.app_fidelidade.data.remote.dto.response.Usuario
+import java.math.BigInteger
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
-import java.math.BigInteger
 
 interface FidelidadeApi {
 

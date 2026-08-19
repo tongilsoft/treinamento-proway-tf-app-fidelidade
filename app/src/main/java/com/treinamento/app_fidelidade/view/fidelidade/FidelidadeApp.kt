@@ -9,22 +9,23 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.treinamento.app_fidelidade.data.remote.RetrofitInstance
-import com.treinamento.app_fidelidade.rotas.Rotas
+import com.treinamento.app_fidelidade.di.AppContainer
 import com.treinamento.app_fidelidade.feature.catalogo.CatalogoEvent
-import com.treinamento.app_fidelidade.viewmodel.AuthenticationViewModel
 import com.treinamento.app_fidelidade.feature.catalogo.CatalogoRoute
 import com.treinamento.app_fidelidade.feature.catalogo.CatalogoViewModel
 import com.treinamento.app_fidelidade.feature.catalogo.DetalhesProdutoRoute
-import com.treinamento.app_fidelidade.feature.carrinho.CarrinhoScreen
-import com.treinamento.app_fidelidade.feature.resgate.ConfirmarResgateScreen
-import com.treinamento.app_fidelidade.feature.resgate.ListaResgatesScreen
-import com.treinamento.app_fidelidade.feature.resgate.OrigemResgate
 import com.treinamento.app_fidelidade.feature.perfil.AlterarSenhaScreen
 import com.treinamento.app_fidelidade.feature.perfil.EditarPerfilScreen
 import com.treinamento.app_fidelidade.feature.perfil.PerfilEvent
 import com.treinamento.app_fidelidade.feature.perfil.PerfilRoute
 import com.treinamento.app_fidelidade.feature.perfil.PerfilViewModel
+import com.treinamento.app_fidelidade.model.OrigemResgate
 import com.treinamento.app_fidelidade.repository.*
+import com.treinamento.app_fidelidade.rotas.Rotas
+import com.treinamento.app_fidelidade.view.carrinho.CarrinhoScreen
+import com.treinamento.app_fidelidade.view.resgate.ConfirmarResgateScreen
+import com.treinamento.app_fidelidade.view.resgate.ListaResgatesScreen
+import com.treinamento.app_fidelidade.viewmodel.AuthenticationViewModel
 
 private enum class AppRoute {
     CATALOGO, DETALHES, PERFIL, EDITAR_PERFIL, ALTERAR_SENHA,
@@ -37,7 +38,7 @@ fun FidelidadeApp(navController: NavHostController) {
     val usuarioRepository = remember { RemoteUsuarioRepository(RetrofitInstance.api) }
 
     val catalogoViewModel: CatalogoViewModel = viewModel(
-        factory = factory { CatalogoViewModel(produtoRepository, usuarioRepository) }
+        factory = factory { CatalogoViewModel(produtoRepository, usuarioRepository, AppContainer.carrinhoRepository, AppContainer.saldoRepository) }
     )
     val perfilViewModel: PerfilViewModel = viewModel(
         factory = factory { PerfilViewModel(usuarioRepository) }

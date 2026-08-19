@@ -6,23 +6,33 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+/** Contrato do saldo, para os ViewModels dependerem da interface e nao do object. */
+interface SaldoRepository {
+    /** Null enquanto a primeira carga nao terminou. */
+    val saldo: StateFlow<Long?>
+
+    suspend fun atualizar(): ResultadoApi<Long>
+
+    /** Usado logo apos um resgate, com o saldo que o proprio servidor devolveu. */
+    fun definir(novoSaldo: Long)
+}
+
 /**
  * Saldo de pontos do usuario logado, vindo de GET /api/pontos.
  *
- * E um object porque carrinho, confirmacao de resgate e catalogo precisam enxergar
- * o mesmo saldo: quando o resgate e concluido o servidor devolve o saldo novo e
- * todas as telas acompanham na hora.
+ * Continua object porque carrinho, confirmacao de resgate e catalogo precisam
+ * enxergar o mesmo saldo: quando o resgate e concluido o servidor devolve o saldo
+ * novo e todas as telas acompanham na hora.
  */
-object SaldoPontosRepositorio {
+object SaldoPontosRepositorio : SaldoRepository {
 
     private val service = ResgateService()
 
     private val _saldo = MutableStateFlow<Long?>(null)
 
-    /** Null enquanto a primeira carga nao terminou. */
-    val saldo: StateFlow<Long?> = _saldo.asStateFlow()
+    override val saldo: StateFlow<Long?> = _saldo.asStateFlow()
 
-    suspend fun atualizar(): ResultadoApi<Long> {
+    override suspend fun atualizar(): ResultadoApi<Long> {
         return when (val resultado = service.buscarSaldo()) {
             is ResultadoApi.Sucesso -> {
                 val valor = resultado.dados.pontosSaldo.toLong()
@@ -35,8 +45,7 @@ object SaldoPontosRepositorio {
         }
     }
 
-    /** Usado logo apos um resgate, com o saldo que o proprio servidor devolveu. */
-    fun definir(novoSaldo: Long) {
+    override fun definir(novoSaldo: Long) {
         _saldo.value = novoSaldo
     }
 }

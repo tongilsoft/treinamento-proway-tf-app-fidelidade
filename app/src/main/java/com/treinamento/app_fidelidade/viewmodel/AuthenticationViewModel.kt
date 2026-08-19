@@ -16,9 +16,9 @@ import com.treinamento.app_fidelidade.data.remote.service.AuthenticationService
 import com.treinamento.app_fidelidade.data.repository.AuthenticationRepository
 import com.treinamento.app_fidelidade.model.UsuarioLogin
 import com.treinamento.app_fidelidade.rotas.Rotas
+import java.io.IOException
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
-import java.io.IOException
 
 class AuthenticationViewModel : ViewModel() {
 

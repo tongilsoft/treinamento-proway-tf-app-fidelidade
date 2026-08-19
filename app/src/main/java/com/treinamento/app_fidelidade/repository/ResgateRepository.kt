@@ -1,91 +1,59 @@
-package com.treinamento.app_fidelidade.feature.resgate
+package com.treinamento.app_fidelidade.repository
 
-import com.treinamento.app_fidelidade.data.remote.dto.request.ItemResgateRequest
 import com.treinamento.app_fidelidade.data.remote.dto.response.MovimentacaoResponse
 import com.treinamento.app_fidelidade.data.remote.service.ResgateService
 import com.treinamento.app_fidelidade.data.remote.service.ResultadoApi
-import com.treinamento.app_fidelidade.feature.carrinho.ItemCarrinho
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
-import java.math.BigInteger
+import com.treinamento.app_fidelidade.model.ItemResgate
+import com.treinamento.app_fidelidade.model.Resgate
+import com.treinamento.app_fidelidade.model.ResgateConcluido
+import com.treinamento.app_fidelidade.model.StatusResgate
+import com.treinamento.app_fidelidade.model.paraItensRequest
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
-/** Escopo do object: vive junto com o processo, nao com uma tela. */
-private val escopo = CoroutineScope(SupervisorJob() + Dispatchers.Default)
-
-enum class StatusResgate { CONCLUIDO, PENDENTE }
-
-/** Abas da tela "Meus Resgates". */
-enum class FiltroResgate { TODOS, CONCLUIDOS, PENDENTES }
-
-data class ItemResgate(
-    val produtoId: Long,
-    val nome: String,
-    val pontos: Long,
-    val quantidade: Int
-) {
-    val totalPontos: Long get() = pontos * quantidade
-}
-
-data class Resgate(
-    val id: Long,
-    val itens: List<ItemResgate>,
-    val status: StatusResgate,
-    val data: String,
-    /** Id devolvido por POST /api/resgate. Null enquanto o resgate esta pendente. */
-    val idResgate: Long? = null
-) {
-    val totalItens: Int get() = itens.sumOf { it.quantidade }
-    val totalPontos: Long get() = itens.sumOf { it.totalPontos }
-
-    /** Titulo do card na lista: primeiro produto (+ quantos outros). */
-    val titulo: String
-        get() {
-            val primeiro = itens.firstOrNull()?.nome ?: "Resgate"
-            val outros = itens.size - 1
-            return if (outros > 0) "$primeiro + $outros item(ns)" else primeiro
-        }
-}
-
-/** De onde a tela de confirmacao foi aberta. */
-sealed interface OrigemResgate {
-    /** Veio do carrinho: o resgate ainda nao existe. */
-    data object Carrinho : OrigemResgate
-
-    /** Veio da lista: e um pendente que sera reenviado. */
-    data class Pendente(val resgateId: Long) : OrigemResgate
-}
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 
 /**
- * Converte os itens do resgate para o corpo de POST /api/resgate.
- * O id do produto no catalogo e o mesmo que a API espera em idProduto.
+ * Contrato dos resgates (camada MODEL).
+ *
+ * O ViewModel fala com esta interface e nao sabe que existe Retrofit do outro lado.
+ * Quem traduz JSON em [Resgate] e a implementacao — se amanha o resgate vier de um
+ * banco local, o ViewModel nao muda.
  */
-fun List<ItemResgate>.paraItensRequest(): List<ItemResgateRequest> = map {
-    ItemResgateRequest(
-        idProduto = BigInteger.valueOf(it.produtoId),
-        quantidade = BigInteger.valueOf(it.quantidade.toLong())
-    )
+interface ResgateRepository {
+
+    /** Pendentes e concluidos ja combinados, prontos para a tela. */
+    val resgates: StateFlow<List<Resgate>>
+
+    fun buscarPorId(id: Long): Resgate?
+
+    /** Rebusca os concluidos no servidor. */
+    suspend fun atualizarConcluidos(): ResultadoApi<List<Resgate>>
+
+    /**
+     * Envia o resgate para a API. E aqui que o Retrofit e usado — o ViewModel
+     * so ve [ResgateConcluido] ou um [ResultadoApi] de falha.
+     */
+    suspend fun criar(itens: List<ItemResgate>): ResultadoApi<ResgateConcluido>
+
+    fun salvarPendente(itens: List<ItemResgate>): Resgate
+
+    fun concluir(id: Long)
 }
 
-/** Converte o que esta no carrinho para os itens do resgate. */
-fun List<ItemCarrinho>.paraItensResgate(): List<ItemResgate> = map {
-    ItemResgate(it.produto.id, it.produto.nome, it.produto.valorPontos, it.quantidade)
-}
-
-object ResgateRepositorio {
-
-    private val service = ResgateService()
+class ResgateRepositoryPadrao(
+    private val service: ResgateService,
+    private val escopo: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+) : ResgateRepository {
 
     private val formatoData = SimpleDateFormat("dd/MM/yyyy", Locale.forLanguageTag("pt-BR"))
     private val formatoDataApi = SimpleDateFormat("yyyy-MM-dd", Locale.forLanguageTag("pt-BR"))
@@ -96,15 +64,29 @@ object ResgateRepositorio {
     /** Pendentes: so existem no app enquanto nao sobem. Vai virar SQLite. */
     private val _pendentes = MutableStateFlow<List<Resgate>>(emptyList())
 
-    /** Pendente primeiro (e o que exige acao), concluido depois, do mais novo para o mais velho. */
-    val resgates: StateFlow<List<Resgate>> = combine(_pendentes, _concluidos) { pendentes, concluidos ->
-        pendentes + concluidos
-    }.stateIn(escopo, SharingStarted.Eagerly, emptyList())
+    /** Pendente primeiro (e o que exige acao), concluido depois. */
+    override val resgates: StateFlow<List<Resgate>> =
+        combine(_pendentes, _concluidos) { pendentes, concluidos -> pendentes + concluidos }
+            .stateIn(escopo, SharingStarted.Eagerly, emptyList())
 
     private var proximoId = 1L
 
-    fun buscarPorId(id: Long): Resgate? =
+    override fun buscarPorId(id: Long): Resgate? =
         _pendentes.value.find { it.id == id } ?: _concluidos.value.find { it.id == id }
+
+    override suspend fun criar(itens: List<ItemResgate>): ResultadoApi<ResgateConcluido> =
+        when (val resultado = service.criarResgate(itens.paraItensRequest())) {
+            is ResultadoApi.Sucesso -> ResultadoApi.Sucesso(
+                ResgateConcluido(
+                    idResgate = resultado.dados.idResgate.toLong(),
+                    pontosUtilizados = resultado.dados.pontosUtilizados.toLong(),
+                    pontosSaldoAtual = resultado.dados.pontosSaldoAtual.toLong()
+                )
+            )
+
+            ResultadoApi.SemConexao -> ResultadoApi.SemConexao
+            is ResultadoApi.Erro -> resultado
+        }
 
     /**
      * Monta a lista de resgates concluidos a partir de GET /pontos/extrato.
@@ -113,7 +95,7 @@ object ResgateRepositorio {
      * debito, mas vem com idProduto nulo. Cada item do resgate e uma movimentacao
      * separada, por isso o agrupamento pelo idResgate que todas compartilham.
      */
-    suspend fun atualizarConcluidos(): ResultadoApi<List<Resgate>> {
+    override suspend fun atualizarConcluidos(): ResultadoApi<List<Resgate>> {
         return when (val resultado = service.buscarExtrato()) {
             is ResultadoApi.Sucesso -> {
                 val concluidos = resultado.dados
@@ -164,7 +146,7 @@ object ResgateRepositorio {
      * So pendente entra aqui. Resgate concluido nao e guardado no app: ele volta
      * pelo extrato do servidor, e salvar dos dois lados duplicaria o card na lista.
      */
-    fun salvarPendente(itens: List<ItemResgate>): Resgate {
+    override fun salvarPendente(itens: List<ItemResgate>): Resgate {
         val novo = Resgate(proximoId++, itens, StatusResgate.PENDENTE, formatoData.format(Date()))
         _pendentes.update { listOf(novo) + it }
         return novo
@@ -174,24 +156,7 @@ object ResgateRepositorio {
      * O pendente sobe com sucesso: sai da lista local porque agora ele existe
      * no extrato do servidor.
      */
-    fun concluir(id: Long) {
+    override fun concluir(id: Long) {
         _pendentes.update { lista -> lista.filterNot { it.id == id } }
-    }
-}
-
-/**
- * Conexao MOCKADA. Na integracao vira ConnectivityManager.
- * Por enquanto o botao de wifi da AppBar liga/desliga, so para demonstrar
- * os dois fluxos (com e sem internet).
- */
-object ConexaoMock {
-
-    private val _online = MutableStateFlow(true)
-    val online: StateFlow<Boolean> = _online.asStateFlow()
-
-    fun estaOnline(): Boolean = _online.value
-
-    fun alternar() {
-        _online.value = !_online.value
     }
 }

@@ -7,7 +7,6 @@ import androidx.navigation.compose.composable
 import com.treinamento.app_fidelidade.view.authentication.AuthenticationScreen
 import com.treinamento.app_fidelidade.view.fidelidade.FidelidadeApp
 
-
 @Composable
 fun NavGraph(navController: NavHostController) {
     NavHost(

@@ -3,7 +3,6 @@ package com.treinamento.app_fidelidade.model
 import java.math.BigInteger
 import java.time.LocalDateTime
 
-
 data class HistoricoPontos(
     val id: BigInteger,
     val idEstabelecimento: BigInteger,

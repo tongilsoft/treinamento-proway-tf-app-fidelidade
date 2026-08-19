@@ -1,4 +1,4 @@
-package com.treinamento.app_fidelidade.feature.resgate
+package com.treinamento.app_fidelidade.view.resgate
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -35,12 +35,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.treinamento.app_fidelidade.feature.carrinho.componentes.ResumoPontos
-import com.treinamento.app_fidelidade.feature.resgate.componentes.BotaoTesteConexao
-import com.treinamento.app_fidelidade.feature.resgate.componentes.ItemResgateCard
+import com.treinamento.app_fidelidade.model.OrigemResgate
+import com.treinamento.app_fidelidade.model.StatusResgate
 import com.treinamento.app_fidelidade.ui.components.FidelidadeBottomBar
 import com.treinamento.app_fidelidade.ui.components.LoadingContent
 import com.treinamento.app_fidelidade.ui.theme.AvisoApp
+import com.treinamento.app_fidelidade.view.carrinho.componentes.ResumoPontos
+import com.treinamento.app_fidelidade.view.resgate.componentes.ItemResgateCard
+import com.treinamento.app_fidelidade.viewmodel.ConfirmarResgateViewModel
+import com.treinamento.app_fidelidade.view.resgate.componentes.BotaoTesteConexao
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,7 +52,7 @@ fun ConfirmarResgateScreen(
     onBack: () -> Unit,
     onResgateFinalizado: (StatusResgate) -> Unit,
     onNavigate: (String) -> Unit,
-    viewModel: ConfirmarResgateViewModel = viewModel(),
+    viewModel: ConfirmarResgateViewModel = viewModel(factory = ConfirmarResgateViewModel.Factory),
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()

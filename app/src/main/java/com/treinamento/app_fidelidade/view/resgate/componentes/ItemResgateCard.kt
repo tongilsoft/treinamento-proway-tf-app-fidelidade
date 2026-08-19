@@ -1,4 +1,4 @@
-package com.treinamento.app_fidelidade.feature.resgate.componentes
+package com.treinamento.app_fidelidade.view.resgate.componentes
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,11 +21,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.treinamento.app_fidelidade.feature.carrinho.componentes.MiniaturaProduto
-import com.treinamento.app_fidelidade.feature.carrinho.formatarPontos
-import com.treinamento.app_fidelidade.feature.resgate.ConexaoMock
-import com.treinamento.app_fidelidade.feature.resgate.ItemResgate
+import com.treinamento.app_fidelidade.model.ItemResgate
+import com.treinamento.app_fidelidade.model.formatarPontos
+import com.treinamento.app_fidelidade.repository.ConexaoMock
 import com.treinamento.app_fidelidade.ui.theme.AvisoApp
+import com.treinamento.app_fidelidade.view.carrinho.componentes.MiniaturaProduto
 
 /** Linha de item na tela de confirmacao (imagem 7). */
 @Composable

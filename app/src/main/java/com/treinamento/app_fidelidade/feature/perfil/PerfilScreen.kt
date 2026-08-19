@@ -38,13 +38,13 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.createBitmap
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.MultiFormatWriter
 import com.treinamento.app_fidelidade.ui.components.FidelidadeBottomBar
 import com.treinamento.app_fidelidade.ui.components.LoadingContent
 import com.treinamento.app_fidelidade.ui.components.OfflineBanner
-import androidx.core.graphics.createBitmap
 import java.math.BigInteger
 
 @OptIn(ExperimentalMaterial3Api::class)

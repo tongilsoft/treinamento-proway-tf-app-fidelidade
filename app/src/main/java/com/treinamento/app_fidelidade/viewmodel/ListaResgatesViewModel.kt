@@ -1,8 +1,17 @@
-package com.treinamento.app_fidelidade.feature.resgate
+package com.treinamento.app_fidelidade.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.treinamento.app_fidelidade.data.remote.service.ResultadoApi
+import com.treinamento.app_fidelidade.di.AppContainer
+import com.treinamento.app_fidelidade.model.FiltroResgate
+import com.treinamento.app_fidelidade.model.Resgate
+import com.treinamento.app_fidelidade.model.StatusResgate
+import com.treinamento.app_fidelidade.repository.Conexao
+import com.treinamento.app_fidelidade.repository.ResgateRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +25,7 @@ data class ListaResgatesUiState(
     val filtro: FiltroResgate = FiltroResgate.TODOS,
     val mensagem: String? = null
 ) {
+    // O filtro das abas e regra de apresentacao: mora no estado, nao na tela.
     val resgatesFiltrados: List<Resgate>
         get() = when (filtro) {
             FiltroResgate.TODOS -> resgates
@@ -26,14 +36,17 @@ data class ListaResgatesUiState(
     val vazio: Boolean get() = resgatesFiltrados.isEmpty()
 }
 
-class ListaResgatesViewModel : ViewModel() {
+class ListaResgatesViewModel(
+    private val resgateRepository: ResgateRepository,
+    private val conexao: Conexao
+) : ViewModel() {
 
     private val filtro = MutableStateFlow(FiltroResgate.TODOS)
     private val mensagem = MutableStateFlow<String?>(null)
     private val carregando = MutableStateFlow(true)
 
     val uiState: StateFlow<ListaResgatesUiState> = combine(
-        ResgateRepositorio.resgates,
+        resgateRepository.resgates,
         filtro,
         mensagem,
         carregando
@@ -52,7 +65,7 @@ class ListaResgatesViewModel : ViewModel() {
      */
     fun carregar() = viewModelScope.launch {
         carregando.value = true
-        when (val resultado = ResgateRepositorio.atualizarConcluidos()) {
+        when (val resultado = resgateRepository.atualizarConcluidos()) {
             is ResultadoApi.Sucesso -> Unit
             ResultadoApi.SemConexao ->
                 mensagem.value = "Sem internet. Mostrando apenas os resgates deste aparelho."
@@ -74,10 +87,21 @@ class ListaResgatesViewModel : ViewModel() {
      * vai tentar enviar de novo. Sem conexao, apenas avisa o usuario.
      */
     fun abrirPendente(resgateId: Long, onOnline: (Long) -> Unit) {
-        if (ConexaoMock.estaOnline()) {
+        if (conexao.estaOnline()) {
             onOnline(resgateId)
         } else {
             mensagem.value = "Voce esta sem internet. Tente novamente mais tarde."
+        }
+    }
+
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                ListaResgatesViewModel(
+                    resgateRepository = AppContainer.resgateRepository,
+                    conexao = AppContainer.conexao
+                )
+            }
         }
     }
 }

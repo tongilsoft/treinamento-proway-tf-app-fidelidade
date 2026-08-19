@@ -2,8 +2,8 @@ package com.treinamento.app_fidelidade.data.remote.service
 
 import com.google.gson.Gson
 import com.treinamento.app_fidelidade.data.remote.dto.response.ErroResponse
-import retrofit2.HttpException
 import java.io.IOException
+import retrofit2.HttpException
 
 /**
  * Resultado de uma chamada da API.
