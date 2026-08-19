@@ -100,7 +100,7 @@ class ConfirmarResgateViewModel : ViewModel() {
                 is ResultadoApi.Sucesso -> {
                     val resgate = resultado.dados
                     SaldoPontosRepositorio.definir(resgate.pontosSaldoAtual.toLong())
-                    registrarConclusao(state, resgate.idResgate.toLong())
+                    registrarConclusao()
                     _uiState.update { it.copy(enviando = false) }
                     onFinalizado(StatusResgate.CONCLUIDO)
                 }
@@ -121,13 +121,14 @@ class ConfirmarResgateViewModel : ViewModel() {
         _uiState.update { it.copy(mensagemErro = null) }
     }
 
-    private fun registrarConclusao(state: ConfirmarResgateUiState, idResgate: Long) {
+    /**
+     * O resgate concluido nao e guardado no app: ele passa a existir no extrato do
+     * servidor e a lista de resgates o busca de la. Aqui so limpamos o que era local.
+     */
+    private fun registrarConclusao() {
         when (val origemAtual = origem) {
-            is OrigemResgate.Pendente -> ResgateRepositorio.concluir(origemAtual.resgateId, idResgate)
-            else -> {
-                ResgateRepositorio.salvar(state.itens, StatusResgate.CONCLUIDO, idResgate)
-                CarrinhoRepositorio.limpar()
-            }
+            is OrigemResgate.Pendente -> ResgateRepositorio.concluir(origemAtual.resgateId)
+            else -> CarrinhoRepositorio.limpar()
         }
     }
 
@@ -143,7 +144,7 @@ class ConfirmarResgateViewModel : ViewModel() {
 
         // Um pendente reenviado sem rede continua pendente: nao duplica na lista.
         if (origem == OrigemResgate.Carrinho) {
-            ResgateRepositorio.salvar(state.itens, StatusResgate.PENDENTE)
+            ResgateRepositorio.salvarPendente(state.itens)
             CarrinhoRepositorio.limpar()
         }
         onFinalizado(StatusResgate.PENDENTE)

@@ -50,6 +50,12 @@ fun ListaResgatesScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    // Rebusca o extrato toda vez que a tela abre: um resgate feito agora ha pouco
+    // precisa aparecer aqui sem reabrir o app.
+    LaunchedEffect(Unit) {
+        viewModel.carregar()
+    }
+
     LaunchedEffect(state.mensagem) {
         state.mensagem?.let {
             snackbarHostState.showSnackbar(it)

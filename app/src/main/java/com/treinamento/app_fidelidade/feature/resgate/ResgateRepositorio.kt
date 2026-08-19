@@ -1,15 +1,28 @@
 package com.treinamento.app_fidelidade.feature.resgate
 
 import com.treinamento.app_fidelidade.data.remote.dto.request.ItemResgateRequest
+import com.treinamento.app_fidelidade.data.remote.dto.response.MovimentacaoResponse
+import com.treinamento.app_fidelidade.data.remote.service.ResgateService
+import com.treinamento.app_fidelidade.data.remote.service.ResultadoApi
 import com.treinamento.app_fidelidade.feature.carrinho.ItemCarrinho
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import java.math.BigInteger
+import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
+/** Escopo do object: vive junto com o processo, nao com uma tela. */
+private val escopo = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
 enum class StatusResgate { CONCLUIDO, PENDENTE }
 
@@ -72,42 +85,98 @@ fun List<ItemCarrinho>.paraItensResgate(): List<ItemResgate> = map {
 
 object ResgateRepositorio {
 
+    private val service = ResgateService()
+
     private val formatoData = SimpleDateFormat("dd/MM/yyyy", Locale.forLanguageTag("pt-BR"))
+    private val formatoDataApi = SimpleDateFormat("yyyy-MM-dd", Locale.forLanguageTag("pt-BR"))
 
-    private val _resgates = MutableStateFlow(resgatesMockados())
-    val resgates: StateFlow<List<Resgate>> = _resgates.asStateFlow()
+    /** Concluidos: vem do extrato do servidor, nao sao guardados aqui. */
+    private val _concluidos = MutableStateFlow<List<Resgate>>(emptyList())
 
-    private var proximoId = 100L
+    /** Pendentes: so existem no app enquanto nao sobem. Vai virar SQLite. */
+    private val _pendentes = MutableStateFlow<List<Resgate>>(emptyList())
 
-    fun buscarPorId(id: Long): Resgate? = _resgates.value.find { it.id == id }
+    /** Pendente primeiro (e o que exige acao), concluido depois, do mais novo para o mais velho. */
+    val resgates: StateFlow<List<Resgate>> = combine(_pendentes, _concluidos) { pendentes, concluidos ->
+        pendentes + concluidos
+    }.stateIn(escopo, SharingStarted.Eagerly, emptyList())
 
-    fun salvar(itens: List<ItemResgate>, status: StatusResgate, idResgate: Long? = null): Resgate {
-        val novo = Resgate(proximoId++, itens, status, formatoData.format(Date()), idResgate)
-        _resgates.update { listOf(novo) + it }
-        return novo
-    }
+    private var proximoId = 1L
 
-    fun concluir(id: Long, idResgate: Long? = null) {
-        _resgates.update { lista ->
-            lista.map {
-                if (it.id == id) it.copy(
-                    status = StatusResgate.CONCLUIDO,
-                    data = formatoData.format(Date()),
-                    idResgate = idResgate ?: it.idResgate
-                )
-                else it
+    fun buscarPorId(id: Long): Resgate? =
+        _pendentes.value.find { it.id == id } ?: _concluidos.value.find { it.id == id }
+
+    /**
+     * Monta a lista de resgates concluidos a partir de GET /pontos/extrato.
+     *
+     * Resgate no extrato e debito com produto: transferencia enviada tambem e
+     * debito, mas vem com idProduto nulo. Cada item do resgate e uma movimentacao
+     * separada, por isso o agrupamento pelo idResgate que todas compartilham.
+     */
+    suspend fun atualizarConcluidos(): ResultadoApi<List<Resgate>> {
+        return when (val resultado = service.buscarExtrato()) {
+            is ResultadoApi.Sucesso -> {
+                val concluidos = resultado.dados
+                    .filter { it.tipo == "debito" && it.idProduto != null }
+                    .groupBy { it.idResgate?.toLong() }
+                    .map { (idResgate, movimentacoes) -> montarResgate(idResgate, movimentacoes) }
+                    .sortedByDescending { it.idResgate ?: it.id }
+                _concluidos.value = concluidos
+                ResultadoApi.Sucesso(concluidos)
             }
+
+            ResultadoApi.SemConexao -> ResultadoApi.SemConexao
+            is ResultadoApi.Erro -> resultado
         }
     }
 
-    // Historico fixo so para a tela ficar igual ao design na apresentacao.
-    private fun resgatesMockados() = listOf(
-        Resgate(1, listOf(ItemResgate(1, "Fone de Ouvido Bluetooth", 1_000, 1)), StatusResgate.CONCLUIDO, "06/05/2025"),
-        Resgate(2, listOf(ItemResgate(2, "Cafeteira Eletrica", 2_800, 1)), StatusResgate.CONCLUIDO, "02/05/2025"),
-        Resgate(3, listOf(ItemResgate(4, "Mochila Executiva", 1_500, 1)), StatusResgate.CONCLUIDO, "28/04/2025"),
-        Resgate(4, listOf(ItemResgate(3, "Caneca Termica", 600, 1)), StatusResgate.PENDENTE, "07/05/2025"),
-        Resgate(5, listOf(ItemResgate(5, "Smartwatch", 5_000, 1)), StatusResgate.PENDENTE, "07/05/2025")
-    )
+    private fun montarResgate(idResgate: Long?, movimentacoes: List<MovimentacaoResponse>): Resgate {
+        val itens = movimentacoes.map { mov ->
+            val quantidade = (mov.quantidade?.toInt() ?: 1).coerceAtLeast(1)
+            ItemResgate(
+                produtoId = mov.idProduto?.toLong() ?: 0L,
+                nome = mov.nomeProduto ?: mov.descricao,
+                // O extrato traz o total da linha; o card mostra o valor unitario.
+                pontos = mov.valorPontos.toLong() / quantidade,
+                quantidade = quantidade
+            )
+        }
+
+        // Movimentacao sem idResgate (historico antigo) usa o id dela mesma como chave.
+        val id = idResgate ?: movimentacoes.first().id.toLong()
+        return Resgate(
+            id = id,
+            itens = itens,
+            status = StatusResgate.CONCLUIDO,
+            data = formatarData(movimentacoes.first().data),
+            idResgate = idResgate
+        )
+    }
+
+    private fun formatarData(dataApi: String): String =
+        try {
+            formatoDataApi.parse(dataApi)?.let { formatoData.format(it) } ?: dataApi
+        } catch (_: ParseException) {
+            dataApi
+        }
+
+    /**
+     * So pendente entra aqui. Resgate concluido nao e guardado no app: ele volta
+     * pelo extrato do servidor, e salvar dos dois lados duplicaria o card na lista.
+     */
+    fun salvarPendente(itens: List<ItemResgate>): Resgate {
+        val novo = Resgate(proximoId++, itens, StatusResgate.PENDENTE, formatoData.format(Date()))
+        _pendentes.update { listOf(novo) + it }
+        return novo
+    }
+
+    /**
+     * O pendente sobe com sucesso: sai da lista local porque agora ele existe
+     * no extrato do servidor.
+     */
+    fun concluir(id: Long) {
+        _pendentes.update { lista -> lista.filterNot { it.id == id } }
+    }
 }
 
 /**

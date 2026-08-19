@@ -2,11 +2,13 @@ package com.treinamento.app_fidelidade.feature.resgate
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.treinamento.app_fidelidade.data.remote.service.ResultadoApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 data class ListaResgatesUiState(
     val carregando: Boolean = true,
@@ -28,19 +30,36 @@ class ListaResgatesViewModel : ViewModel() {
 
     private val filtro = MutableStateFlow(FiltroResgate.TODOS)
     private val mensagem = MutableStateFlow<String?>(null)
+    private val carregando = MutableStateFlow(true)
 
     val uiState: StateFlow<ListaResgatesUiState> = combine(
         ResgateRepositorio.resgates,
         filtro,
-        mensagem
-    ) { resgates, filtroAtual, msg ->
+        mensagem,
+        carregando
+    ) { resgates, filtroAtual, msg, carregandoAtual ->
         ListaResgatesUiState(
-            carregando = false,
+            carregando = carregandoAtual,
             resgates = resgates,
             filtro = filtroAtual,
             mensagem = msg
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ListaResgatesUiState())
+
+    /**
+     * Busca os concluidos no extrato do servidor. Os pendentes nao dependem disso:
+     * eles sao locais e continuam na lista mesmo se a chamada falhar.
+     */
+    fun carregar() = viewModelScope.launch {
+        carregando.value = true
+        when (val resultado = ResgateRepositorio.atualizarConcluidos()) {
+            is ResultadoApi.Sucesso -> Unit
+            ResultadoApi.SemConexao ->
+                mensagem.value = "Sem internet. Mostrando apenas os resgates deste aparelho."
+            is ResultadoApi.Erro -> mensagem.value = resultado.mensagem
+        }
+        carregando.value = false
+    }
 
     fun alterarFiltro(novoFiltro: FiltroResgate) {
         filtro.value = novoFiltro
