@@ -44,25 +44,8 @@ O projeto segue o padrão arquitetural **MVVM (Model-View-ViewModel)** com separ
 
 ## Arquitetura Geral
 
-```text
-┌─────────────────────┐
-│       View          │
-│      Screens        │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│     ViewModel       │
-└──────────┬──────────┘
-           │
-           ▼
-┌─────────────────────┐
-│     Repository      │
-└───────┬─────┬───────┘
-        │     │
-        ▼     ▼
- Remote API   Local Database
-```
+<img width="1724" height="2244" alt="image" src="https://github.com/user-attachments/assets/616e6b19-9623-40b0-8d4f-a9d0f5622521" />
+
 
 ## Estrutura de Camadas
 
@@ -120,22 +103,11 @@ com.treinamento.app_fidelidade
 
 # 🔄 Fluxo de Navegação
 
-```text
-Splash
-   ↓
-Login
-   ↓
-Cadastro
-   ↓
-Home
-   │
-   ├── Extrato de Pontos
-   ├── Promoções
-   ├── Parceiros
-   ├── Catálogo de Recompensas
-   ├── Resgate
-   └── Perfil
-```
+<img width="4568" height="2888" alt="image" src="https://github.com/user-attachments/assets/07efd163-b18e-477c-807c-8fd9477a1392" />
+
+# Fluxo de Login
+
+<img width="1764" height="3448" alt="image" src="https://github.com/user-attachments/assets/b583d32d-392f-49d6-9386-1a6d3d65f9d1" />
 
 ---
 
