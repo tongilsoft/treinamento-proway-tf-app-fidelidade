@@ -1,10 +1,12 @@
 package com.treinamento.app_fidelidade.feature.resgate
 
+import com.treinamento.app_fidelidade.data.remote.dto.request.ItemResgateRequest
 import com.treinamento.app_fidelidade.feature.carrinho.ItemCarrinho
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import java.math.BigInteger
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -27,7 +29,9 @@ data class Resgate(
     val id: Long,
     val itens: List<ItemResgate>,
     val status: StatusResgate,
-    val data: String
+    val data: String,
+    /** Id devolvido por POST /api/resgate. Null enquanto o resgate esta pendente. */
+    val idResgate: Long? = null
 ) {
     val totalItens: Int get() = itens.sumOf { it.quantidade }
     val totalPontos: Long get() = itens.sumOf { it.totalPontos }
@@ -50,6 +54,17 @@ sealed interface OrigemResgate {
     data class Pendente(val resgateId: Long) : OrigemResgate
 }
 
+/**
+ * Converte os itens do resgate para o corpo de POST /api/resgate.
+ * O id do produto no catalogo e o mesmo que a API espera em idProduto.
+ */
+fun List<ItemResgate>.paraItensRequest(): List<ItemResgateRequest> = map {
+    ItemResgateRequest(
+        idProduto = BigInteger.valueOf(it.produtoId),
+        quantidade = BigInteger.valueOf(it.quantidade.toLong())
+    )
+}
+
 /** Converte o que esta no carrinho para os itens do resgate. */
 fun List<ItemCarrinho>.paraItensResgate(): List<ItemResgate> = map {
     ItemResgate(it.produto.id, it.produto.nome, it.produto.valorPontos, it.quantidade)
@@ -66,15 +81,20 @@ object ResgateRepositorio {
 
     fun buscarPorId(id: Long): Resgate? = _resgates.value.find { it.id == id }
 
-    fun salvar(itens: List<ItemResgate>, status: StatusResgate) {
-        val novo = Resgate(proximoId++, itens, status, formatoData.format(Date()))
+    fun salvar(itens: List<ItemResgate>, status: StatusResgate, idResgate: Long? = null): Resgate {
+        val novo = Resgate(proximoId++, itens, status, formatoData.format(Date()), idResgate)
         _resgates.update { listOf(novo) + it }
+        return novo
     }
 
-    fun concluir(id: Long) {
+    fun concluir(id: Long, idResgate: Long? = null) {
         _resgates.update { lista ->
             lista.map {
-                if (it.id == id) it.copy(status = StatusResgate.CONCLUIDO, data = formatoData.format(Date()))
+                if (it.id == id) it.copy(
+                    status = StatusResgate.CONCLUIDO,
+                    data = formatoData.format(Date()),
+                    idResgate = idResgate ?: it.idResgate
+                )
                 else it
             }
         }

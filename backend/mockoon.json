@@ -53,7 +53,7 @@
       "responses": [
         {
           "uuid": "00000000-0000-0000-0000-100000000002",
-          "body": "{{setVar 'novoNome' (bodyRaw 'name')}}{{setVar 'novoEmail' (bodyRaw 'email')}}{{setVar 'novaSenha' (bodyRaw 'senha')}}{{setVar 'agora' (now)}}{{setVar 'novoId' (add (len (dataRaw 'usuariosCadastrados')) 1)}}{{setVar 'novoUsuario' (objectMerge (dataRaw 'usuarioDefault') (object id=@novoId name=@novoNome email=@novoEmail senha=@novaSenha createdAt=@agora updatedAt=@agora))}}{{setData 'push' 'usuariosCadastrados' '' @novoUsuario}}{{setData 'set' 'usuarioAutenticadoAtual' 'idUsuarioAtual' @novoId}}{\n  \"success\": true,\n  \"message\": \"Cadastro realizado com sucesso\",\n  \"data\": {\n    \"id\": {{@novoId}},\n    \"name\": \"{{@novoNome}}\",\n    \"email\": \"{{@novoEmail}}\",\n    \"pontosSaldo\": {{objectPath @novoUsuario 'pontosSaldo'}},\n    \"qrCode\": \"{{objectPath @novoUsuario 'qrCode'}}\",\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\",\n    \"createdAt\": \"{{@agora}}\",\n    \"updatedAt\": \"{{@agora}}\"\n  }\n}",
+          "body": "{{setVar 'novoNome' (bodyRaw 'name')}}{{#unless @novoNome}}{{setVar 'novoNome' (bodyRaw 'nome')}}{{/unless}}{{setVar 'novoEmail' (bodyRaw 'email')}}{{setVar 'novaSenha' (bodyRaw 'senha')}}{{#unless @novaSenha}}{{setVar 'novaSenha' (bodyRaw 'password')}}{{/unless}}{{setVar 'agora' (now)}}{{setVar 'novoId' (add (len (dataRaw 'usuariosCadastrados')) 1)}}{{setVar 'novoUsuario' (objectMerge (dataRaw 'usuarioDefault') (object id=@novoId name=@novoNome email=@novoEmail senha=@novaSenha createdAt=@agora updatedAt=@agora))}}{{setData 'push' 'usuariosCadastrados' '' @novoUsuario}}{\n  \"success\": true,\n  \"message\": \"Cadastro realizado com sucesso\",\n  \"data\": {\n    \"id\": {{@novoId}},\n    \"name\": \"{{@novoNome}}\",\n    \"email\": \"{{@novoEmail}}\",\n    \"pontosSaldo\": {{objectPath @novoUsuario 'pontosSaldo'}},\n    \"qrCode\": \"{{objectPath @novoUsuario 'qrCode'}}\",\n    \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9\",\n    \"createdAt\": \"{{@agora}}\",\n    \"updatedAt\": \"{{@agora}}\"\n  }\n}",
           "latency": 300,
           "statusCode": 201,
           "label": "Success",
@@ -91,6 +91,42 @@
           "uuid": "00000000-0000-0000-0000-100000000003",
           "body": "{{setVar 'idAtual' (dataRaw 'usuarioAutenticadoAtual' 'idUsuarioAtual')}}{{setVar 'usuarioAtual' (find (dataRaw 'usuariosCadastrados') (object id=@idAtual))}}{\n  \"success\": true,\n  \"data\": {{{stringify @usuarioAtual}}}\n}",
           "latency": 150,
+          "statusCode": 200,
+          "label": "Success",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "00000000-0000-0000-0000-000000000016",
+      "type": "http",
+      "documentation": "Atualizar dados do usuario logado",
+      "method": "put",
+      "endpoint": "usuarios/meusDados",
+      "responses": [
+        {
+          "uuid": "00000000-0000-0000-0000-100000000016",
+          "body": "{{setVar 'idAtual' (dataRaw 'usuarioAutenticadoAtual' 'idUsuarioAtual')}}{{setVar 'agora' (now)}}{{setVar 'usuarioAtual' (find (dataRaw 'usuariosCadastrados') (object id=@idAtual))}}{{setVar 'emailNovo' (bodyRaw 'email' '')}}{{setVar 'emailEmUso' false}}{{#if @emailNovo}}{{setVar 'donoDoEmail' (find (dataRaw 'usuariosCadastrados') (object email=@emailNovo))}}{{#if @donoDoEmail}}{{#unless (eq (objectPath @donoDoEmail 'id') @idAtual)}}{{setVar 'emailEmUso' true}}{{/unless}}{{/if}}{{/if}}{{#if @usuarioAtual}}{{#if @emailEmUso}}{{status 409}}{\n  \"success\": false,\n  \"message\": \"Este email ja esta em uso por outro usuario\",\n  \"debug\": {\n    \"emailRecebido\": \"{{@emailNovo}}\"\n  }\n}{{else}}{{#each (dataRaw 'usuariosCadastrados')}}{{#if (eq this.id @../idAtual)}}{{setVar 'atualizado' (objectMerge this (object name=(bodyRaw 'name' this.name) email=(bodyRaw 'email' this.email) senha=(bodyRaw 'senha' this.senha) telefone=(bodyRaw 'telefone' this.telefone) cpf=(bodyRaw 'cpf' this.cpf) dataNascimento=(bodyRaw 'dataNascimento' this.dataNascimento) genero=(bodyRaw 'genero' this.genero) ativo=(bodyRaw 'ativo' this.ativo) qrCode=(bodyRaw 'qrCode' this.qrCode) nivelMembro=(bodyRaw 'nivelMembro' this.nivelMembro) ultimoAcesso=(bodyRaw 'ultimoAcesso' this.ultimoAcesso) endereco=(object logradouro=(bodyRaw 'endereco.logradouro' this.endereco.logradouro) numero=(bodyRaw 'endereco.numero' this.endereco.numero) bairro=(bodyRaw 'endereco.bairro' this.endereco.bairro) cidade=(bodyRaw 'endereco.cidade' this.endereco.cidade) uf=(bodyRaw 'endereco.uf' this.endereco.uf) cep=(bodyRaw 'endereco.cep' this.endereco.cep)) updatedAt=@../agora))}}{{setData 'set' 'usuariosCadastrados' (concat @index '') @atualizado}}{\n  \"success\": true,\n  \"message\": \"Dados atualizados com sucesso\",\n  \"data\": {{{stringify @atualizado}}}\n}{{/if}}{{/each}}{{/if}}{{else}}{{status 401}}{\n  \"success\": false,\n  \"message\": \"Nenhum usuario autenticado. Faca login antes de alterar os dados\"\n}{{/if}}",
+          "latency": 250,
           "statusCode": 200,
           "label": "Success",
           "headers": [
@@ -163,6 +199,42 @@
           "uuid": "00000000-0000-0000-0000-100000000005",
           "body": "{{setVar 'idAtual' (dataRaw 'usuarioAutenticadoAtual' 'idUsuarioAtual')}}{{setVar 'usuarioAtual' (find (dataRaw 'usuariosCadastrados') (object id=@idAtual))}}{\n  \"success\": true,\n  \"data\": {{{stringify (objectPath @usuarioAtual 'movimentacoes')}}}\n}",
           "latency": 150,
+          "statusCode": 200,
+          "label": "Success",
+          "headers": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    },
+    {
+      "uuid": "00000000-0000-0000-0000-000000000015",
+      "type": "http",
+      "documentation": "Transferir pontos entre usuarios",
+      "method": "post",
+      "endpoint": "pontos/transferir",
+      "responses": [
+        {
+          "uuid": "00000000-0000-0000-0000-100000000015",
+          "body": "{{setVar 'idAtual' (dataRaw 'usuarioAutenticadoAtual' 'idUsuarioAtual')}}{{setVar 'emailDestino' (bodyRaw 'emailDestino')}}{{#unless @emailDestino}}{{setVar 'emailDestino' (bodyRaw 'email')}}{{/unless}}{{setVar 'pontosTransferir' (bodyRaw 'valorPontos')}}{{#unless @pontosTransferir}}{{setVar 'pontosTransferir' (bodyRaw 'pontos')}}{{/unless}}{{#unless @pontosTransferir}}{{setVar 'pontosTransferir' (bodyRaw 'pontosTransferidos')}}{{/unless}}{{#unless @pontosTransferir}}{{setVar 'pontosTransferir' (bodyRaw 'quantidade')}}{{/unless}}{{setVar 'agora' (now)}}{{setVar 'usuarioAtual' (find (dataRaw 'usuariosCadastrados') (object id=@idAtual))}}{{setVar 'usuarioDestino' (find (dataRaw 'usuariosCadastrados') (object email=@emailDestino))}}{{setVar 'nomeAtual' (objectPath @usuarioAtual 'name')}}{{setVar 'saldoOrigem' (objectPath @usuarioAtual 'pontosSaldo')}}{{#if @usuarioAtual}}{{#if @usuarioDestino}}{{setVar 'idDestino' (objectPath @usuarioDestino 'id')}}{{setVar 'nomeDestino' (objectPath @usuarioDestino 'name')}}{{#if (eq @idDestino @idAtual)}}{{status 400}}{\n  \"success\": false,\n  \"message\": \"Nao e possivel transferir pontos para o proprio usuario\"\n}{{else}}{{#if (gt @pontosTransferir 0)}}{{#if (gte @saldoOrigem @pontosTransferir)}}{{#each (dataRaw 'usuariosCadastrados')}}{{#if (eq this.id @../idDestino)}}{{setVar 'saldoAtualDestino' (add this.pontosSaldo @../pontosTransferir)}}{{setVar 'proximoIdMovDestino' (add (len this.movimentacoes) 1)}}{{setData 'set' 'usuariosCadastrados' (concat @index '.pontosSaldo') @saldoAtualDestino}}{{setData 'inc' 'usuariosCadastrados' (concat @index '.totalPontosGanhos') @../pontosTransferir}}{{setData 'set' 'usuariosCadastrados' (concat @index '.updatedAt') @../agora}}{{setData 'push' 'usuariosCadastrados' (concat @index '.movimentacoes') (object id=@proximoIdMovDestino idUsuario=@../idDestino idProduto=null tipo='credito' valorPontos=@../pontosTransferir descricao=(concat 'Transferencia recebida de ' @../nomeAtual) data=(now 'yyyy-MM-dd') createdAt=@../agora updatedAt=@../agora)}}{{/if}}{{#if (eq this.id @../idAtual)}}{{setVar 'saldoAnteriorOrigem' this.pontosSaldo}}{{setVar 'saldoAtualOrigem' (subtract this.pontosSaldo @../pontosTransferir)}}{{setVar 'proximoIdMovOrigem' (add (len this.movimentacoes) 1)}}{{setData 'set' 'usuariosCadastrados' (concat @index '.pontosSaldo') @saldoAtualOrigem}}{{setData 'inc' 'usuariosCadastrados' (concat @index '.pontosUtilizados') @../pontosTransferir}}{{setData 'set' 'usuariosCadastrados' (concat @index '.updatedAt') @../agora}}{{setData 'push' 'usuariosCadastrados' (concat @index '.movimentacoes') (object id=@proximoIdMovOrigem idUsuario=@../idAtual idProduto=null tipo='debito' valorPontos=@../pontosTransferir descricao=(concat 'Transferencia enviada para ' @../nomeDestino) data=(now 'yyyy-MM-dd') createdAt=@../agora updatedAt=@../agora)}}{\n  \"success\": true,\n  \"message\": \"Transferencia realizada com sucesso\",\n  \"data\": {\n    \"idUsuarioOrigem\": {{@../idAtual}},\n    \"nomeUsuarioOrigem\": \"{{@../nomeAtual}}\",\n    \"idUsuarioDestino\": {{@../idDestino}},\n    \"nomeUsuarioDestino\": \"{{@../nomeDestino}}\",\n    \"emailDestino\": \"{{@../emailDestino}}\",\n    \"pontosTransferidos\": {{@../pontosTransferir}},\n    \"pontosSaldoAnteriorOrigem\": {{@saldoAnteriorOrigem}},\n    \"pontosSaldoAtualOrigem\": {{@saldoAtualOrigem}},\n    \"createdAt\": \"{{@../agora}}\"\n  }\n}{{/if}}{{/each}}{{else}}{{status 400}}{\n  \"success\": false,\n  \"message\": \"Saldo de pontos insuficiente para realizar a transferencia\",\n  \"debug\": {\n    \"pontosSolicitados\": {{@pontosTransferir}},\n    \"pontosSaldoAtual\": {{@saldoOrigem}}\n  }\n}{{/if}}{{else}}{{status 400}}{\n  \"success\": false,\n  \"message\": \"Informe uma quantidade de pontos maior que zero no campo valorPontos\",\n  \"debug\": {\n    \"valorRecebido\": {{#if @pontosTransferir}}{{@pontosTransferir}}{{else}}null{{/if}},\n    \"camposAceitos\": [\"valorPontos\", \"pontos\", \"pontosTransferidos\", \"quantidade\"]\n  }\n}{{/if}}{{/if}}{{else}}{{status 404}}{\n  \"success\": false,\n  \"message\": \"Usuario destinatario nao encontrado\",\n  \"debug\": {\n    \"emailDestinoRecebido\": \"{{@emailDestino}}\"\n  }\n}{{/if}}{{else}}{{status 401}}{\n  \"success\": false,\n  \"message\": \"Usuario de origem nao autenticado. Faca login antes de transferir pontos\"\n}{{/if}}",
+          "latency": 250,
           "statusCode": 200,
           "label": "Success",
           "headers": [
@@ -263,13 +335,13 @@
     {
       "uuid": "00000000-0000-0000-0000-000000000011",
       "type": "http",
-      "documentation": "Criar resgate",
+      "documentation": "Criar resgate com um ou varios itens",
       "method": "post",
       "endpoint": "resgate",
       "responses": [
         {
           "uuid": "00000000-0000-0000-0000-100000000011",
-          "body": "{{setVar 'idProdutoResgate' (bodyRaw 'idProduto')}}{{setVar 'produto' (find (dataRaw 'produtos') (object id=@idProdutoResgate))}}{{setVar 'agora' (now)}}{{setVar 'idAtual' (dataRaw 'usuarioAutenticadoAtual' 'idUsuarioAtual')}}{{#if @produto}}{{setVar 'valorPontosResgate' (objectPath @produto 'valorPontos')}}{{setVar 'nomeProdutoResgate' (objectPath @produto 'name')}}{{#each (dataRaw 'usuariosCadastrados')}}{{#if (eq this.id @../idAtual)}}{{setVar 'saldoAnterior' this.pontosSaldo}}{{setVar 'saldoAtual' (subtract @saldoAnterior @../valorPontosResgate)}}{{setVar 'proximoIdMov' (add (len this.movimentacoes) 1)}}{{setData 'set' 'usuariosCadastrados' (concat @index '.pontosSaldo') @saldoAtual}}{{setData 'inc' 'usuariosCadastrados' (concat @index '.pontosUtilizados') @../valorPontosResgate}}{{setData 'set' 'usuariosCadastrados' (concat @index '.updatedAt') @../agora}}{{setData 'push' 'usuariosCadastrados' (concat @index '.movimentacoes') (object id=@proximoIdMov idUsuario=@../idAtual idProduto=@../idProdutoResgate tipo='debito' valorPontos=@../valorPontosResgate descricao=(concat 'Resgate solicitado: ' @../nomeProdutoResgate) data=(now 'yyyy-MM-dd') createdAt=@../agora updatedAt=@../agora)}}{\n  \"success\": true,\n  \"message\": \"Resgate criado com sucesso\",\n  \"data\": {\n    \"idResgate\": {{int 1000 9999}},\n    \"idUsuario\": {{@../idAtual}},\n    \"idProduto\": {{@../idProdutoResgate}},\n    \"nomeProduto\": \"{{@../nomeProdutoResgate}}\",\n    \"pontosUtilizados\": {{@../valorPontosResgate}},\n    \"pontosSaldoAnterior\": {{@saldoAnterior}},\n    \"pontosSaldoAtual\": {{@saldoAtual}},\n    \"status\": \"pendente\",\n    \"dataCriacao\": \"{{@../agora}}\",\n    \"dataConfirmacao\": null,\n    \"createdAt\": \"{{@../agora}}\",\n    \"updatedAt\": \"{{@../agora}}\"\n  }\n}{{/if}}{{/each}}{{else}}{{status 404}}{\n  \"success\": false,\n  \"message\": \"Produto não encontrado para o resgate informado\"\n}{{/if}}",
+          "body": "{{setVar 'idAtual' (dataRaw 'usuarioAutenticadoAtual' 'idUsuarioAtual')}}{{setVar 'agora' (now)}}{{setVar 'usuarioAtual' (find (dataRaw 'usuariosCadastrados') (object id=@idAtual))}}{{setData 'set' 'resgateEmAndamento' 'itens' (array)}}{{setData 'set' 'resgateEmAndamento' 'total' 0}}{{setData 'set' 'resgateEmAndamento' 'itensInvalidos' 0}}{{setData 'set' 'resgateEmAndamento' 'quantidadesInvalidas' 0}}{{setData 'set' 'resgateEmAndamento' 'indiceUsuario' -1}}{{setData 'set' 'resgateEmAndamento' 'proximoIdMov' 1}}{{#if (bodyRaw 'itens')}}{{#each (bodyRaw 'itens')}}{{setData 'push' 'resgateEmAndamento' 'itens' (object idProduto=this.idProduto quantidade=(bodyRaw (concat 'itens.' @index '.quantidade') 1))}}{{/each}}{{else}}{{#if (bodyRaw 'idProduto')}}{{setData 'push' 'resgateEmAndamento' 'itens' (object idProduto=(bodyRaw 'idProduto') quantidade=(bodyRaw 'quantidade' 1))}}{{/if}}{{/if}}{{#each (dataRaw 'resgateEmAndamento' 'itens')}}{{setVar 'prod' (find (dataRaw 'produtos') (object id=this.idProduto))}}{{#unless (gt this.quantidade 0)}}{{setData 'inc' 'resgateEmAndamento' 'quantidadesInvalidas' 1}}{{/unless}}{{#if @prod}}{{setData 'inc' 'resgateEmAndamento' 'total' (multiply (objectPath @prod 'valorPontos') this.quantidade)}}{{else}}{{setData 'inc' 'resgateEmAndamento' 'itensInvalidos' 1}}{{/if}}{{/each}}{{setVar 'itensResgate' (dataRaw 'resgateEmAndamento' 'itens')}}{{setVar 'qtdItens' (len @itensResgate)}}{{setVar 'total' (dataRaw 'resgateEmAndamento' 'total')}}{{setVar 'invalidos' (dataRaw 'resgateEmAndamento' 'itensInvalidos')}}{{setVar 'qtdInvalidas' (dataRaw 'resgateEmAndamento' 'quantidadesInvalidas')}}{{setVar 'saldoAnterior' (objectPath @usuarioAtual 'pontosSaldo')}}{{setVar 'saldoAtual' (subtract @saldoAnterior @total)}}{{#if @usuarioAtual}}{{#if (gt @qtdItens 0)}}{{#if (eq @invalidos 0)}}{{#if (eq @qtdInvalidas 0)}}{{#if (gte @saldoAnterior @total)}}{{#each (dataRaw 'usuariosCadastrados')}}{{#if (eq this.id @../idAtual)}}{{setData 'set' 'resgateEmAndamento' 'indiceUsuario' @index}}{{setData 'set' 'resgateEmAndamento' 'proximoIdMov' (add (len this.movimentacoes) 1)}}{{/if}}{{/each}}{{setVar 'idxUsuario' (dataRaw 'resgateEmAndamento' 'indiceUsuario')}}{{setVar 'baseIdMov' (dataRaw 'resgateEmAndamento' 'proximoIdMov')}}{{#each @itensResgate}}{{setVar 'prod' (find (dataRaw 'produtos') (object id=this.idProduto))}}{{setData 'push' 'usuariosCadastrados' (concat @../idxUsuario '.movimentacoes') (object id=(add @../baseIdMov @index) idUsuario=@../idAtual idProduto=this.idProduto tipo='debito' valorPontos=(multiply (objectPath @prod 'valorPontos') this.quantidade) descricao=(concat 'Resgate solicitado: ' (objectPath @prod 'name') ' (x' this.quantidade ')') data=(now 'yyyy-MM-dd') createdAt=@../agora updatedAt=@../agora)}}{{/each}}{{setData 'set' 'usuariosCadastrados' (concat @idxUsuario '.pontosSaldo') @saldoAtual}}{{setData 'inc' 'usuariosCadastrados' (concat @idxUsuario '.pontosUtilizados') @total}}{{setData 'set' 'usuariosCadastrados' (concat @idxUsuario '.updatedAt') @agora}}{\n  \"success\": true,\n  \"message\": \"Resgate criado com sucesso\",\n  \"data\": {\n    \"idResgate\": {{int 1000 9999}},\n    \"idUsuario\": {{@idAtual}},\n    \"quantidadeItens\": {{@qtdItens}},\n    \"itens\": [\n    {{#each @itensResgate}}{{setVar 'p' (find (dataRaw 'produtos') (object id=this.idProduto))}}{\n      \"idProduto\": {{this.idProduto}},\n      \"nomeProduto\": \"{{objectPath @p 'name'}}\",\n      \"quantidade\": {{this.quantidade}},\n      \"valorPontosUnitario\": {{objectPath @p 'valorPontos'}},\n      \"valorPontosTotal\": {{multiply (objectPath @p 'valorPontos') this.quantidade}}\n    }{{#unless @last}},\n    {{/unless}}{{/each}}\n    ],\n    \"pontosUtilizados\": {{@total}},\n    \"pontosSaldoAnterior\": {{@saldoAnterior}},\n    \"pontosSaldoAtual\": {{@saldoAtual}},\n    \"status\": \"pendente\",\n    \"dataCriacao\": \"{{@agora}}\",\n    \"dataConfirmacao\": null,\n    \"createdAt\": \"{{@agora}}\",\n    \"updatedAt\": \"{{@agora}}\"\n  }\n}{{else}}{{status 400}}{\n  \"success\": false,\n  \"message\": \"Saldo de pontos insuficiente para realizar o resgate\",\n  \"debug\": {\n    \"pontosNecessarios\": {{@total}},\n    \"pontosSaldoAtual\": {{@saldoAnterior}}\n  }\n}{{/if}}{{else}}{{status 400}}{\n  \"success\": false,\n  \"message\": \"Todo item do resgate precisa de uma quantidade maior que zero\",\n  \"debug\": {\n    \"itensComQuantidadeInvalida\": {{@qtdInvalidas}}\n  }\n}{{/if}}{{else}}{{status 404}}{\n  \"success\": false,\n  \"message\": \"Produto nao encontrado para o resgate informado\",\n  \"debug\": {\n    \"itensNaoEncontrados\": {{@invalidos}},\n    \"itensRecebidos\": {{{stringify @itensResgate}}}\n  }\n}{{/if}}{{else}}{{status 400}}{\n  \"success\": false,\n  \"message\": \"Informe ao menos um item no resgate\",\n  \"debug\": {\n    \"formatosAceitos\": [\"itens: [{ idProduto, quantidade }]\", \"idProduto (item unico)\"]\n  }\n}{{/if}}{{else}}{{status 401}}{\n  \"success\": false,\n  \"message\": \"Nenhum usuario autenticado. Faca login antes de resgatar\"\n}{{/if}}",
           "latency": 250,
           "statusCode": 201,
           "label": "Success",
@@ -348,11 +420,19 @@
     },
     {
       "type": "route",
+      "uuid": "00000000-0000-0000-0000-000000000016"
+    },
+    {
+      "type": "route",
       "uuid": "00000000-0000-0000-0000-000000000004"
     },
     {
       "type": "route",
       "uuid": "00000000-0000-0000-0000-000000000005"
+    },
+    {
+      "type": "route",
+      "uuid": "00000000-0000-0000-0000-000000000015"
     },
     {
       "type": "route",
@@ -442,6 +522,13 @@
       "name": "UsuarioDefault",
       "documentation": "Perfil padrao usado como base para clonar novos cadastros (nome/email/senha/datas sao sobrescritos)",
       "value": "{\n  \"id\": 1,\n  \"name\": \"Joao Silva\",\n  \"email\": \"joao@example.com\",\n  \"senha\": \"123456\",\n  \"telefone\": \"(11) 98765-4321\",\n  \"cpf\": \"123.456.789-10\",\n  \"dataNascimento\": \"1993-09-20\",\n  \"genero\": \"masculino\",\n  \"endereco\": {\n    \"logradouro\": \"Rua das Flores\",\n    \"numero\": \"150\",\n    \"bairro\": \"Centro\",\n    \"cidade\": \"Sao Paulo\",\n    \"uf\": \"SP\",\n    \"cep\": \"01010-000\"\n  },\n  \"ativo\": true,\n  \"qrCode\": \"QR123456789\",\n  \"nivelMembro\": \"Prata\",\n  \"dataRegistro\": \"2024-06-15\",\n  \"ultimoAcesso\": \"2026-08-10T08:50:00Z\",\n  \"pontosSaldo\": 2200,\n  \"pontosUtilizados\": 0,\n  \"totalPontosGanhos\": 2800,\n  \"createdAt\": \"2024-06-15T09:00:00Z\",\n  \"updatedAt\": \"2026-08-10T08:50:00Z\",\n  \"movimentacoes\": [\n    {\n      \"id\": 1,\n      \"idUsuario\": 1,\n      \"idProduto\": 2,\n      \"tipo\": \"credito\",\n      \"valorPontos\": 2000,\n      \"descricao\": \"Bonificacao por compra em Drogasil\",\n      \"data\": \"2026-08-01\",\n      \"createdAt\": \"2026-08-01T10:10:00Z\",\n      \"updatedAt\": \"2026-08-01T10:10:00Z\"\n    },\n    {\n      \"id\": 2,\n      \"idUsuario\": 1,\n      \"idProduto\": 14,\n      \"tipo\": \"debito\",\n      \"valorPontos\": 600,\n      \"descricao\": \"Resgate confirmado: Protetor solar FPS 50 120ml\",\n      \"data\": \"2026-08-02\",\n      \"createdAt\": \"2026-08-02T11:30:00Z\",\n      \"updatedAt\": \"2026-08-02T11:30:00Z\"\n    },\n    {\n      \"id\": 3,\n      \"idUsuario\": 1,\n      \"idProduto\": 6,\n      \"tipo\": \"credito\",\n      \"valorPontos\": 800,\n      \"descricao\": \"Bonificacao por compra em Ultrafarma\",\n      \"data\": \"2026-08-03\",\n      \"createdAt\": \"2026-08-03T09:25:00Z\",\n      \"updatedAt\": \"2026-08-03T09:25:00Z\"\n    }\n  ]\n}"
+    },
+    {
+      "uuid": "00000000-0000-0000-0000-200000000002",
+      "id": "resgateEmAndamento",
+      "name": "ResgateEmAndamento",
+      "documentation": "Rascunho usado pelo POST /resgate para somar o total de varios itens (o Handlebars descarta variaveis ao sair do #each)",
+      "value": "{\n  \"itens\": [],\n  \"total\": 0,\n  \"itensInvalidos\": 0,\n  \"quantidadesInvalidas\": 0,\n  \"indiceUsuario\": -1,\n  \"proximoIdMov\": 1\n}"
     }
   ],
   "callbacks": []

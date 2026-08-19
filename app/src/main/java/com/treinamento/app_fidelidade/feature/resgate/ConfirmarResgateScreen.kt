@@ -90,7 +90,7 @@ fun ConfirmarResgateScreen(
                 ) {
                     Button(
                         onClick = { viewModel.confirmar(onResgateFinalizado) },
-                        enabled = state.itens.isNotEmpty(),
+                        enabled = state.itens.isNotEmpty() && !state.enviando,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(52.dp),
@@ -145,6 +145,10 @@ fun ConfirmarResgateScreen(
                     ItemResgateCard(item = item)
                 }
 
+                state.mensagemErro?.let { mensagem ->
+                    item { AvisoErro(mensagem) }
+                }
+
                 item {
                     if (state.semConexao) {
                         AvisoSemConexao()
@@ -158,6 +162,26 @@ fun ConfirmarResgateScreen(
                 }
             }
         }
+    }
+}
+
+/** Erro de regra devolvido pela API, por exemplo saldo insuficiente. */
+@Composable
+private fun AvisoErro(mensagem: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer,
+            contentColor = MaterialTheme.colorScheme.onErrorContainer
+        )
+    ) {
+        Text(
+            text = mensagem,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        )
     }
 }
 

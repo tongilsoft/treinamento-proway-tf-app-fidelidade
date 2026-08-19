@@ -21,14 +21,29 @@ fun Long.formatarPontos(): String =
     NumberFormat.getIntegerInstance(Locale.forLanguageTag("pt-BR")).format(this)
 
 /**
- * Repositorio do carrinho em memoria (mockado).
+ * Repositorio do carrinho em memoria.
  * E um object para a tela de Resgate enxergar os mesmos itens e limpar o
  * carrinho depois que o resgate e concluido.
  */
 object CarrinhoRepositorio {
 
-    private val _itens = MutableStateFlow(itensMockados())
+    private val _itens = MutableStateFlow<List<ItemCarrinho>>(emptyList())
     val itens: StateFlow<List<ItemCarrinho>> = _itens.asStateFlow()
+
+    /** Somar de novo o mesmo produto aumenta a quantidade da linha existente. */
+    fun adicionar(produto: Produto, quantidade: Int = 1) {
+        if (quantidade < 1) return
+        _itens.update { lista ->
+            val existente = lista.find { it.produto.id == produto.id }
+            if (existente == null) {
+                lista + ItemCarrinho(produto, quantidade)
+            } else {
+                lista.map {
+                    if (it.produto.id == produto.id) it.copy(quantidade = it.quantidade + quantidade) else it
+                }
+            }
+        }
+    }
 
     fun alterarQuantidade(produtoId: Long, novaQuantidade: Int) {
         if (novaQuantidade < 1) return
@@ -44,11 +59,4 @@ object CarrinhoRepositorio {
     fun limpar() {
         _itens.value = emptyList()
     }
-
-    // Itens fixos so para a tela ficar igual ao design na apresentacao.
-    private fun itensMockados() = listOf(
-        ItemCarrinho(Produto(1, "Fone de Ouvido Bluetooth", "", 1_000, "Eletronicos", ""), 1),
-        ItemCarrinho(Produto(2, "Cafeteira Eletrica", "", 2_800, "Casa", ""), 1),
-        ItemCarrinho(Produto(3, "Caneca Termica", "", 600, "Acessorios", ""), 1)
-    )
 }

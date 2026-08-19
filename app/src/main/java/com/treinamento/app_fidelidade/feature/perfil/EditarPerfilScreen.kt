@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+// NOTE: Remover edição de dados do perfil — a UI de edição deve ser desabilitada para evitar alterações no client.
+// Caso haja tempo, implementar controle de edição via feature flag com validação/autorizações no backend.
 fun EditarPerfilScreen(
     state: PerfilUiState,
     onBack: () -> Unit,
