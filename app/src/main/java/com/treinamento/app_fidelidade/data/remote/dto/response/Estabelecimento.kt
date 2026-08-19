@@ -10,6 +10,6 @@ data class Estabelecimento(
     val endereco: String,
     val latitude: BigDecimal,
     val longitude: BigDecimal,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime
+    val createdAt: String,
+    val updatedAt: String
 )

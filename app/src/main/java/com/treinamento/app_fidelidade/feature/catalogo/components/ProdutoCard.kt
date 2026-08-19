@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CardDefaults
@@ -22,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.treinamento.app_fidelidade.model.Produto
 import java.math.BigInteger
 
@@ -56,10 +58,23 @@ fun ProdutoCard(
                     .background(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.shapes.small),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "Img", 
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+
+                AsyncImage(
+                    //https://flags.restcountries.com/v5/w640/br.png
+                    model = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcv_a1URHdVxFR8qCh_UBTyRHOB-rJDKjEOeX-3djIuQ&s=10",
+//                imageLoader = imageLoader,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    contentDescription = null,
+//                onLoading = {
+//                    println("Carregando...")
+//                },
+//                onSuccess = {
+//                    println("Imagem OK")
+//                },
+//                onError = {
+//                    println(it.result.throwable)
+//                }
                 )
             }
 

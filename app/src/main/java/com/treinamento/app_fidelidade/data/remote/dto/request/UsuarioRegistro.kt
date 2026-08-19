@@ -10,6 +10,6 @@ data class UsuarioRegistro(
     val password: String,
     val pontosSaldo: BigInteger = BigInteger.ZERO,
     val qrCode: String?,
-    val createdAt: LocalDateTime?,
-    val updatedAt: LocalDateTime?
+    val createdAt: String?,
+    val updatedAt: String?
 )

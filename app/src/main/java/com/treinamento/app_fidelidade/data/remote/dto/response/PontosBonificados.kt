@@ -7,6 +7,6 @@ data class PontosBonificados(
     val idUsuario: BigInteger,
     val idEstabelecimento: BigInteger,
     val pontos: BigInteger,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime
+    val createdAt: String,
+    val updatedAt: String
 )

@@ -1,4 +1,4 @@
-package com.treinamento.app_fidelidade.data.repository
+package com.treinamento.app_fidelidade.data.repository.api
 
 import com.treinamento.app_fidelidade.data.remote.dto.request.UsuarioLoginRequest
 import com.treinamento.app_fidelidade.data.remote.dto.request.UsuarioRegistro

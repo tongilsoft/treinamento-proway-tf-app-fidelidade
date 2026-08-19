@@ -1,14 +1,17 @@
 package com.treinamento.app_fidelidade.data.remote.dto.response
 
+import java.time.LocalDateTime
 
-import java.math.BigInteger
 
 data class Usuario(
-    val id: BigInteger,
+    val id: Long,
     val name: String,
+    val senha: String,
     val email: String,
-    val pontosSaldo: BigInteger,
+    val pontosSaldo: Long,
     val qrCode: String,
-    val token: String
+    val token: String,
+    val createdAt: String? = null,
+    val updatedAt: String? = null
 )
 

@@ -9,6 +9,6 @@ data class HistoricoPontos(
     val idEstabelecimento: BigInteger,
     val pontoGasto: BigInteger,
     val idProduto: BigInteger,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime
+    val createdAt: String,
+    val updatedAt: String
 )

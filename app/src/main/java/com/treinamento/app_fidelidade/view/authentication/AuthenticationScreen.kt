@@ -35,8 +35,11 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.treinamento.app_fidelidade.data.repository.api.AuthenticationRepository
+import com.treinamento.app_fidelidade.data.repository.db.UsuarioDBRepository
 import com.treinamento.app_fidelidade.rotas.Rotas
 import com.treinamento.app_fidelidade.viewmodel.AuthenticationViewModel
+import com.treinamento.app_fidelidade.viewmodel.AuthenticationViewModelFactory
 import kotlinx.coroutines.launch
 
 private val BackgroundColor = Color(0xFF001427)
@@ -51,8 +54,17 @@ private const val REGISTER_TAB = 1
 @Composable
 fun AuthenticationScreen(
     navController: NavHostController,
-    viewModel: AuthenticationViewModel = viewModel()
+    repository: UsuarioDBRepository,
+//    viewModel: AuthenticationViewModel = viewModel()
 ) {
+
+    val factory = remember(repository) {
+        AuthenticationViewModelFactory(repository)
+    }
+
+    val viewModel: AuthenticationViewModel = viewModel(
+        factory = factory
+    )
 
     var selectedTab by remember {
         mutableIntStateOf(LOGIN_TAB)
@@ -82,9 +94,9 @@ fun AuthenticationScreen(
         if (authenticatedUser != null) {
             try {
                 navController.navigate(Rotas.FIDELIDADE) {
-                    popUpTo(Rotas.AUTHENTICATION) {
-                        inclusive = false
-                    }
+//                    popUpTo(Rotas.AUTHENTICATION) {
+//                        inclusive = false
+//                    }
                     launchSingleTop = false
                 }
             }catch (e: Exception){

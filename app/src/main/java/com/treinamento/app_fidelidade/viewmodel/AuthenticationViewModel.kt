@@ -5,22 +5,19 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import com.treinamento.app_fidelidade.data.remote.RetrofitInstance
 import com.treinamento.app_fidelidade.data.remote.dto.request.UsuarioRegistro
 import com.treinamento.app_fidelidade.data.remote.dto.response.Usuario
 import com.treinamento.app_fidelidade.data.remote.service.AuthenticationService
-import com.treinamento.app_fidelidade.data.repository.AuthenticationRepository
+import com.treinamento.app_fidelidade.data.repository.api.AuthenticationRepository
+import com.treinamento.app_fidelidade.data.repository.db.UsuarioDBRepository
 import com.treinamento.app_fidelidade.model.UsuarioLogin
-import com.treinamento.app_fidelidade.rotas.Rotas
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
 
-class AuthenticationViewModel : ViewModel() {
+class AuthenticationViewModel (repositoryDB: UsuarioDBRepository) : ViewModel() {
 
 
     private val service = AuthenticationService(
@@ -30,6 +27,8 @@ class AuthenticationViewModel : ViewModel() {
     private val repository = AuthenticationRepository(
         service = service
     )
+
+    private val repositoryDB = repositoryDB
 
     /*
      * Usuário autenticado.
@@ -77,9 +76,8 @@ class AuthenticationViewModel : ViewModel() {
                 val response = repository.doLogin(usuarioLogin)
 
                 if (response.success && response.data != null) {
-                    usuario = response.data
-
-//                    redirectScreen(Rotas.FIDELIDADE, navController)
+//                    usuario = response.data
+                    salvarSQLite(response.data, repositoryDB)
                 } else {
                     errorMessage = response.message
                         ?.takeIf { message ->
@@ -133,9 +131,8 @@ class AuthenticationViewModel : ViewModel() {
                 val response = repository.doRegister(usuarioRegister)
 
                 if (response.success && response.data != null) {
-                    usuario = response.data
-
-//                    redirectScreen(Rotas.FIDELIDADE, navController)
+//                    usuario = response.data
+                    salvarSQLite(response.data, repositoryDB)
 
                 } else {
                     errorMessage = response.message
@@ -169,16 +166,29 @@ class AuthenticationViewModel : ViewModel() {
         }
     }
 
-//    fun redirectScreen(rotaFocus: String, navController: NavHostController){
-//        try {
-//            navController.navigate(rotaFocus) {
-//                launchSingleTop = false
-//            }
-//        }
-//        catch (e: Exception){
-//            println(e.message)
-//        }
-//    }
+    suspend fun salvarSQLite(usuarioNovo: Usuario?, repositoryDB: UsuarioDBRepository){
+        try {
+            if (usuarioNovo != null) {
+
+                repositoryDB.cadastrar(
+                    com.treinamento.app_fidelidade.model.Usuario(
+                        id = usuarioNovo.id,
+                        nome = usuarioNovo.name,
+                        email = usuarioNovo.email,
+                        token = usuarioNovo.token,
+                        pontosSaldo = usuarioNovo.pontosSaldo,
+                        qrCode = usuarioNovo.qrCode,
+                        createdAt = usuarioNovo.createdAt ,
+                        updatedAt = usuarioNovo.updatedAt
+                    )
+                )
+                usuario = usuarioNovo
+            }
+        }
+        catch (e: Exception){
+            println(e.message)
+        }
+    }
 
     /**
      * Limpa a mensagem depois que o Snackbar termina de apresentá-la.

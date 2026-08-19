@@ -7,6 +7,6 @@ data class Categoria(
     val id: BigInteger,
     val name: String,
     val descricao: String,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime
+    val createdAt: String,
+    val updatedAt: String
 )

@@ -9,6 +9,6 @@ data class Produto(
     val descricao: String,
     val valorPontos: BigInteger,
     val idCategoria: BigInteger,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime
+    val createdAt: String,
+    val updatedAt: String
 )

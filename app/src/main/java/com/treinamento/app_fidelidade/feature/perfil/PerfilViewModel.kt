@@ -2,6 +2,7 @@ package com.treinamento.app_fidelidade.feature.perfil
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.treinamento.app_fidelidade.data.repository.db.UsuarioDBRepository
 import com.treinamento.app_fidelidade.repository.UsuarioRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -13,9 +14,11 @@ private data class Controls(
 )
 
 class PerfilViewModel(
-    private val usuarioRepository: UsuarioRepository
+    private val usuarioRepository: UsuarioRepository,
+    repository: UsuarioDBRepository
 ) : ViewModel() {
     private val controls = MutableStateFlow(Controls())
+    private val repository = repository
 
     val uiState: StateFlow<PerfilUiState> = combine(
         usuarioRepository.observarUsuario(),
@@ -70,6 +73,25 @@ class PerfilViewModel(
                 .onFailure { error ->
                     controls.update { it.copy(atualizando = false, mensagem = error.message ?: "Erro ao alterar senha") }
                 }
+        }
+    }
+    fun sairConta(){
+        viewModelScope.launch {
+            try {
+                controls.update { it.copy(atualizando = true, mensagem = null) }
+                repository.removerUsuarios()
+            } catch (error: Exception) {
+                controls.update {
+                    it.copy(
+                        atualizando = false,
+                        mensagem = error.message ?: "Erro ao sair da conta"
+                    )
+                }
+            } finally {
+                controls.update {
+                    it.copy(atualizando = false)
+                }
+            }
         }
     }
 

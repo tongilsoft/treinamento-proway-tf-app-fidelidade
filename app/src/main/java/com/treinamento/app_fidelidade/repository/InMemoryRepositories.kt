@@ -43,7 +43,11 @@ class InMemoryUsuarioRepository : UsuarioRepository {
             email = "natalierrowan@gmail.com",
 //            endereco = "Rua das Flores, 123",
             pontosSaldo = 13_123_678,
-            qrCode = "FIDELIDADE-123456789"
+            qrCode = "FIDELIDADE-123456789",
+            token = "hgfjhgfhjgfjhgf",
+            urlImage = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcv_a1URHdVxFR8qCh_UBTyRHOB-rJDKjEOeX-3djIuQ&s=10",
+            createdAt = null,
+            updatedAt = null,
         )
     )
     override fun observarUsuario(): Flow<Usuario> = usuario

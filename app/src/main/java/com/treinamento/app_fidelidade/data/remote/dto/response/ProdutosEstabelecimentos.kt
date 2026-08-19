@@ -7,6 +7,6 @@ data class ProdutosEstabelecimentos(
     val id: BigInteger,
     val idProduto: BigInteger,
     val idEstabelecimento: BigInteger,
-    val createdAt: LocalDateTime,
-    val updatedAt: LocalDateTime
+    val createdAt: String,
+    val updatedAt: String
 )

@@ -7,10 +7,10 @@ data class Usuario(
     val id: Long,
     val nome: String,
     val email: String,
-    val password: String? = null,
     val pontosSaldo: Long,
+    val token: String,
     val qrCode: String,
     val urlImage: String? = null,
-    val createdAt: LocalDateTime? = null,
-    val updatedAt: LocalDateTime? = null
+    val createdAt: String? = null,
+    val updatedAt: String? = null
 )

@@ -17,4 +17,8 @@ interface FidelidadeApi {
     suspend fun cadastrar(
         @Body usuario: UsuarioRegistro
     ): AuthResponse
+
+//    @GET("auth/cadastro")
+//    suspend fun cadastrar(): AuthResponse
+//
 }

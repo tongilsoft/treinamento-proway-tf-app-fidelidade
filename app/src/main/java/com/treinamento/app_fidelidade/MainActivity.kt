@@ -4,11 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.navigation.compose.rememberNavController
+import com.treinamento.app_fidelidade.data.local.config.AppDatabase
+import com.treinamento.app_fidelidade.data.repository.db.UsuarioDBRepository
+import com.treinamento.app_fidelidade.data.repository.db.UsuarioRepositoryImpl
 import com.treinamento.app_fidelidade.rotas.NavGraph
 import com.treinamento.app_fidelidade.ui.theme.FidelidadeTheme
-import com.treinamento.app_fidelidade.view.authentication.AuthenticationScreen
-
-import com.treinamento.app_fidelidade.view.fidelidade.FidelidadeApp
+import kotlinx.coroutines.flow.first
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -16,8 +17,12 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val navController = rememberNavController()
+            val dao = AppDatabase.getDatabase(context = applicationContext).usuarioDao()
+            val repository: UsuarioDBRepository = UsuarioRepositoryImpl(dao)
+//            val factory = AlunoViewModelFactory(repository)
+
             FidelidadeTheme {
-                NavGraph(navController)
+                NavGraph(navController, repository)
                 //AuthenticationScreen(rememberNavController())
 //                FidelidadeApp()
             }

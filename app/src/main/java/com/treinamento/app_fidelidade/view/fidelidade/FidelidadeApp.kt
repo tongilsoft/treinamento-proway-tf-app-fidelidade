@@ -1,5 +1,6 @@
 package com.treinamento.app_fidelidade.view.fidelidade
 
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -7,6 +8,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import com.treinamento.app_fidelidade.data.repository.db.UsuarioDBRepository
 import com.treinamento.app_fidelidade.feature.catalogo.CatalogoRoute
 import com.treinamento.app_fidelidade.feature.catalogo.CatalogoViewModel
 import com.treinamento.app_fidelidade.feature.catalogo.DetalhesProdutoRoute
@@ -16,11 +19,36 @@ import com.treinamento.app_fidelidade.feature.perfil.PerfilEvent
 import com.treinamento.app_fidelidade.feature.perfil.PerfilRoute
 import com.treinamento.app_fidelidade.feature.perfil.PerfilViewModel
 import com.treinamento.app_fidelidade.repository.*
+import com.treinamento.app_fidelidade.ui.components.util.rememberNetworkConnection
 
 private enum class AppRoute { CATALOGO, DETALHES, PERFIL, EDITAR_PERFIL, ALTERAR_SENHA }
 
 @Composable
-fun FidelidadeApp() {
+fun FidelidadeApp(
+    navController: NavHostController,
+    repository: UsuarioDBRepository
+) {
+
+
+    val snackbarHostState = remember {
+        SnackbarHostState()
+    }
+
+    val isConnected = rememberNetworkConnection()
+    10
+    LaunchedEffect(isConnected) {
+
+        val mensagem = if (isConnected) {
+            "Internet conectada"
+        } else {
+            "Sem conexão com a internet"
+        }
+        snackbarHostState.showSnackbar(
+                    message = mensagem
+        )
+    }
+
+
     val produtoRepository = remember { InMemoryProdutoRepository() }
     val usuarioRepository = remember { InMemoryUsuarioRepository() }
 
@@ -28,7 +56,7 @@ fun FidelidadeApp() {
         factory = factory { CatalogoViewModel(produtoRepository, usuarioRepository) }
     )
     val perfilViewModel: PerfilViewModel = viewModel(
-        factory = factory { PerfilViewModel(usuarioRepository) }
+        factory = factory { PerfilViewModel(usuarioRepository, repository) }
     )
 
     val catalogo by catalogoViewModel.uiState.collectAsStateWithLifecycle()
@@ -67,7 +95,8 @@ fun FidelidadeApp() {
             viewModel = perfilViewModel,
             onNavigateToEditarPerfil = { currentRoute = AppRoute.EDITAR_PERFIL },
             onNavigateToAlterarSenha = { currentRoute = AppRoute.ALTERAR_SENHA },
-            onNavigate = ::navigate
+            onNavigate = ::navigate,
+            navController = navController
         )
 
         AppRoute.EDITAR_PERFIL -> EditarPerfilScreen(
