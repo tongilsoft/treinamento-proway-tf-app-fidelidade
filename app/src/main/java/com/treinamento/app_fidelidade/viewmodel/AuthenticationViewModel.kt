@@ -1,5 +1,6 @@
 package com.treinamento.app_fidelidade.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -13,9 +14,9 @@ import com.treinamento.app_fidelidade.data.remote.service.AuthenticationService
 import com.treinamento.app_fidelidade.data.repository.api.AuthenticationRepository
 import com.treinamento.app_fidelidade.data.repository.db.UsuarioDBRepository
 import com.treinamento.app_fidelidade.model.UsuarioLogin
+import java.io.IOException
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
-import java.io.IOException
 
 class AuthenticationViewModel (repositoryDB: UsuarioDBRepository) : ViewModel() {
 
@@ -74,7 +75,7 @@ class AuthenticationViewModel (repositoryDB: UsuarioDBRepository) : ViewModel() 
                 usuario = null
 
                 val response = repository.doLogin(usuarioLogin)
-
+                Log.d("TESTE", "Response: $response")
                 if (response.success && response.data != null) {
 //                    usuario = response.data
                     salvarSQLite(response.data, repositoryDB)

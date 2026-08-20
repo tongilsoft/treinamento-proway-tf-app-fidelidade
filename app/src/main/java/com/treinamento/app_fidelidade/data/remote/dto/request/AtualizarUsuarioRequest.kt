@@ -1,5 +1,6 @@
 package com.treinamento.app_fidelidade.data.remote.dto.request
 
+
 /**
  * Corpo de PUT /api/usuarios/meusDados, aplicado ao usuario logado.
  *

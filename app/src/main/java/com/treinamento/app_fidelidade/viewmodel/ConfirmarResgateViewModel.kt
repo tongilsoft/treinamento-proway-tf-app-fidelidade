@@ -1,11 +1,22 @@
-package com.treinamento.app_fidelidade.feature.resgate
+package com.treinamento.app_fidelidade.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.treinamento.app_fidelidade.data.remote.service.ResgateService
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.treinamento.app_fidelidade.data.remote.service.ResultadoApi
-import com.treinamento.app_fidelidade.feature.carrinho.CarrinhoRepositorio
-import com.treinamento.app_fidelidade.repository.SaldoPontosRepositorio
+import com.treinamento.app_fidelidade.di.AppContainer
+import com.treinamento.app_fidelidade.model.ItemResgate
+import com.treinamento.app_fidelidade.model.OrigemResgate
+import com.treinamento.app_fidelidade.model.Resgate
+import com.treinamento.app_fidelidade.model.StatusResgate
+import com.treinamento.app_fidelidade.model.paraItensResgate
+import com.treinamento.app_fidelidade.repository.CarrinhoRepository
+import com.treinamento.app_fidelidade.repository.Conexao
+import com.treinamento.app_fidelidade.repository.ConexaoMock
+import com.treinamento.app_fidelidade.repository.ResgateRepository
+import com.treinamento.app_fidelidade.repository.SaldoRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,7 +37,7 @@ data class ConfirmarResgateUiState(
     val totalItens: Int get() = itens.sumOf { it.quantidade }
     val totalPontos: Long get() = itens.sumOf { it.totalPontos }
 
-    // Textos da tela mudam conforme tem ou nao internet (imagens 7 e 8).
+    // Ate o texto dos botoes sai do estado: a tela nao decide nada, so desenha.
     val titulo: String get() = if (semConexao) "Resgate Pendente" else "Confirmar Resgate"
     val textoBotao: String
         get() = when {
@@ -35,13 +46,24 @@ data class ConfirmarResgateUiState(
             else -> "Confirmar Resgate"
         }
     val textoRodape: String
-        get() = if (semConexao) "Voce pode acompanhar na tela de Resgates Pendentes."
-        else "Ao confirmar, seus pontos serao debitados imediatamente."
+        get() = if (semConexao) "Você pode acompanhar na tela de Resgates Pendentes."
+        else "Ao confirmar, seus pontos serão debitados imediatamente."
 }
 
-class ConfirmarResgateViewModel : ViewModel() {
-
-    private val service = ResgateService()
+/**
+ * VIEWMODEL da confirmacao de resgate.
+ *
+ * As tres dependencias entram pelo construtor. Antes este ViewModel dava
+ * `ResgateService()` e falava com `ConexaoMock` direto: eram dependencias
+ * escondidas, impossiveis de substituir no teste. Agora sao declaradas, e da para
+ * criar o ViewModel com um repositorio falso e uma conexao que responde offline.
+ */
+class ConfirmarResgateViewModel(
+    private val resgateRepository: ResgateRepository,
+    private val carrinhoRepository: CarrinhoRepository,
+    private val saldoRepository: SaldoRepository,
+    private val conexao: Conexao
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ConfirmarResgateUiState())
     val uiState: StateFlow<ConfirmarResgateUiState> = _uiState.asStateFlow()
@@ -50,7 +72,7 @@ class ConfirmarResgateViewModel : ViewModel() {
 
     init {
         viewModelScope.launch {
-            SaldoPontosRepositorio.saldo.collect { saldo ->
+            saldoRepository.saldo.collect { saldo ->
                 _uiState.update { it.copy(saldoPontos = saldo ?: 0) }
             }
         }
@@ -62,8 +84,8 @@ class ConfirmarResgateViewModel : ViewModel() {
         this.origem = origem
 
         val itens = when (origem) {
-            OrigemResgate.Carrinho -> CarrinhoRepositorio.itens.value.paraItensResgate()
-            is OrigemResgate.Pendente -> ResgateRepositorio.buscarPorId(origem.resgateId)?.itens.orEmpty()
+            OrigemResgate.Carrinho -> carrinhoRepository.itens.value.paraItensResgate()
+            is OrigemResgate.Pendente -> resgateRepository.buscarPorId(origem.resgateId)?.itens.orEmpty()
         }
 
         _uiState.update {
@@ -71,7 +93,7 @@ class ConfirmarResgateViewModel : ViewModel() {
         }
 
         // Saldo atual do servidor, para o resumo da tela nao ficar defasado.
-        viewModelScope.launch { SaldoPontosRepositorio.atualizar() }
+        viewModelScope.launch { saldoRepository.atualizar() }
     }
 
     /**
@@ -88,7 +110,7 @@ class ConfirmarResgateViewModel : ViewModel() {
         val state = _uiState.value
         if (state.itens.isEmpty() || state.enviando) return
 
-        if (!ConexaoMock.estaOnline()) {
+        if (!conexao.estaOnline()) {
             tratarSemConexao(state, onFinalizado)
             return
         }
@@ -96,10 +118,9 @@ class ConfirmarResgateViewModel : ViewModel() {
         viewModelScope.launch {
             _uiState.update { it.copy(enviando = true, mensagemErro = null) }
 
-            when (val resultado = service.criarResgate(state.itens.paraItensRequest())) {
+            when (val resultado = resgateRepository.criar(state.itens)) {
                 is ResultadoApi.Sucesso -> {
-                    val resgate = resultado.dados
-                    SaldoPontosRepositorio.definir(resgate.pontosSaldoAtual.toLong())
+                    saldoRepository.definir(resultado.dados.pontosSaldoAtual.toLong())
                     registrarConclusao()
                     _uiState.update { it.copy(enviando = false) }
                     onFinalizado(StatusResgate.CONCLUIDO)
@@ -127,8 +148,8 @@ class ConfirmarResgateViewModel : ViewModel() {
      */
     private fun registrarConclusao() {
         when (val origemAtual = origem) {
-            is OrigemResgate.Pendente -> ResgateRepositorio.concluir(origemAtual.resgateId)
-            else -> CarrinhoRepositorio.limpar()
+            is OrigemResgate.Pendente -> resgateRepository.concluir(origemAtual.resgateId)
+            else -> carrinhoRepository.limpar()
         }
     }
 
@@ -144,9 +165,22 @@ class ConfirmarResgateViewModel : ViewModel() {
 
         // Um pendente reenviado sem rede continua pendente: nao duplica na lista.
         if (origem == OrigemResgate.Carrinho) {
-            ResgateRepositorio.salvarPendente(state.itens)
-            CarrinhoRepositorio.limpar()
+            resgateRepository.salvarPendente(state.itens)
+            carrinhoRepository.limpar()
         }
         onFinalizado(StatusResgate.PENDENTE)
+    }
+
+    companion object {
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                ConfirmarResgateViewModel(
+                    resgateRepository = AppContainer.resgateRepository,
+                    carrinhoRepository = AppContainer.carrinhoRepository,
+                    saldoRepository = AppContainer.saldoRepository,
+                    conexao = AppContainer.conexao
+                )
+            }
+        }
     }
 }

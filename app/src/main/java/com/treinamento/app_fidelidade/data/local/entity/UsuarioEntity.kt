@@ -1,8 +1,8 @@
 package com.treinamento.app_fidelidade.data.local.entity
 
-import java.time.LocalDateTime
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.time.LocalDateTime
 
 @Entity(tableName = "usuarios")
 data class UsuarioEntity(

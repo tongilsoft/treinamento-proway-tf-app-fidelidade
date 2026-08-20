@@ -1,4 +1,4 @@
-package com.treinamento.app_fidelidade.feature.carrinho.componentes
+package com.treinamento.app_fidelidade.view.carrinho.componentes
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,9 +26,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+
 import coil.compose.AsyncImage
-import com.treinamento.app_fidelidade.feature.carrinho.ItemCarrinho
-import com.treinamento.app_fidelidade.feature.carrinho.formatarPontos
+
+import com.treinamento.app_fidelidade.model.ItemCarrinho
+import com.treinamento.app_fidelidade.model.formatarPontos
 
 @Composable
 fun ItemCarrinhoCard(
@@ -58,22 +60,10 @@ fun ItemCarrinhoCard(
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
-                    //https://flags.restcountries.com/v5/w640/br.png
                     model = item.produto.imagemUrl,
-//                    model = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcv_a1URHdVxFR8qCh_UBTyRHOB-rJDKjEOeX-3djIuQ&s=10",
-//                imageLoader = imageLoader,
                     modifier = Modifier
                         .fillMaxWidth(),
-                    contentDescription = null,
-//                onLoading = {
-//                    println("Carregando...")
-//                },
-//                onSuccess = {
-//                    println("Imagem OK")
-//                },
-//                onError = {
-//                    println(it.result.throwable)
-//                }
+                    contentDescription = null
                 )
             }
             Column(

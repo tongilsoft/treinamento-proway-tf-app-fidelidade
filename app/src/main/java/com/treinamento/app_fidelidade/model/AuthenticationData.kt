@@ -5,5 +5,5 @@ import com.treinamento.app_fidelidade.data.remote.dto.response.Usuario
 data class AuthenticationData (
     val success: Boolean,
     val message : String,
-    val data : Usuario
+    val data : Usuario?
 )

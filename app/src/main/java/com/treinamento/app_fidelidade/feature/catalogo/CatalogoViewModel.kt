@@ -2,10 +2,10 @@ package com.treinamento.app_fidelidade.feature.catalogo
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.treinamento.app_fidelidade.feature.carrinho.CarrinhoRepositorio
 import com.treinamento.app_fidelidade.model.Produto
+import com.treinamento.app_fidelidade.repository.CarrinhoRepository
 import com.treinamento.app_fidelidade.repository.ProdutoRepository
-import com.treinamento.app_fidelidade.repository.SaldoPontosRepositorio
+import com.treinamento.app_fidelidade.repository.SaldoRepository
 import com.treinamento.app_fidelidade.repository.UsuarioRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -22,7 +22,9 @@ private data class Controls(
 
 class CatalogoViewModel(
     private val produtoRepository: ProdutoRepository,
-    usuarioRepository: UsuarioRepository
+    usuarioRepository: UsuarioRepository,
+    private val carrinhoRepository: CarrinhoRepository,
+    private val saldoRepository: SaldoRepository
 ) : ViewModel() {
     private val controls = MutableStateFlow(Controls())
 
@@ -34,7 +36,7 @@ class CatalogoViewModel(
         produtos,
         usuarioRepository.observarUsuario(),
         controls,
-        CarrinhoRepositorio.itens
+        carrinhoRepository.itens
     ) { produtos, usuario, c, itensCarrinho ->
         val filtrados = produtos
             .filter { c.busca.isBlank() || it.nome.contains(c.busca, true) || it.descricao.contains(c.busca, true) }
@@ -70,7 +72,7 @@ class CatalogoViewModel(
                 if (produto == null) {
                     controls.update { it.copy(mensagem = "Produto nao encontrado no catalogo.") }
                 } else {
-                    CarrinhoRepositorio.adicionar(produto, event.quantidade)
+                    carrinhoRepository.adicionar(produto, event.quantidade)
                     controls.update {
                         it.copy(mensagem = "${event.quantidade} produto(s) adicionado(s) ao carrinho!")
                     }
@@ -85,7 +87,7 @@ class CatalogoViewModel(
         controls.update { it.copy(atualizando = true, mensagem = null) }
         // O saldo tambem se recupera aqui: "Seus pontos: 0" nao pode ficar preso
         // so porque a primeira carga pegou o servidor fora do ar.
-        SaldoPontosRepositorio.atualizar()
+        saldoRepository.atualizar()
         produtoRepository.atualizarProdutos()
             .onSuccess { controls.update { it.copy(atualizando = false, offline = false) } }
             .onFailure {

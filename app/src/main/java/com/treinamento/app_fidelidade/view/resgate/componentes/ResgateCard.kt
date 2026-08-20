@@ -1,4 +1,4 @@
-package com.treinamento.app_fidelidade.feature.resgate.componentes
+package com.treinamento.app_fidelidade.view.resgate.componentes
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,9 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.treinamento.app_fidelidade.feature.carrinho.formatarPontos
-import com.treinamento.app_fidelidade.feature.resgate.Resgate
-import com.treinamento.app_fidelidade.feature.resgate.StatusResgate
+import com.treinamento.app_fidelidade.model.Resgate
+import com.treinamento.app_fidelidade.model.StatusResgate
+import com.treinamento.app_fidelidade.model.formatarPontos
 import com.treinamento.app_fidelidade.ui.theme.AvisoApp
 import com.treinamento.app_fidelidade.ui.theme.Sucesso
 

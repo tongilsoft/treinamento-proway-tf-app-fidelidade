@@ -1,4 +1,4 @@
-package com.treinamento.app_fidelidade.feature.resgate
+package com.treinamento.app_fidelidade.view.resgate
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -33,10 +33,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.treinamento.app_fidelidade.feature.resgate.componentes.BotaoTesteConexao
-import com.treinamento.app_fidelidade.feature.resgate.componentes.ResgateCard
+import com.treinamento.app_fidelidade.model.FiltroResgate
 import com.treinamento.app_fidelidade.ui.components.FidelidadeBottomBar
 import com.treinamento.app_fidelidade.ui.components.LoadingContent
+import com.treinamento.app_fidelidade.view.resgate.componentes.ResgateCard
+import com.treinamento.app_fidelidade.viewmodel.ListaResgatesViewModel
+import com.treinamento.app_fidelidade.view.resgate.componentes.BotaoTesteConexao
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,7 +46,7 @@ fun ListaResgatesScreen(
     onBack: () -> Unit,
     onConfirmarPendente: (Long) -> Unit,
     onNavigate: (String) -> Unit,
-    viewModel: ListaResgatesViewModel = viewModel(),
+    viewModel: ListaResgatesViewModel = viewModel(factory = ListaResgatesViewModel.Factory),
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()

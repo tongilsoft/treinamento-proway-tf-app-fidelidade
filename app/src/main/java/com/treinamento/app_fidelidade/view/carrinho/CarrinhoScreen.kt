@@ -1,4 +1,4 @@
-package com.treinamento.app_fidelidade.feature.carrinho
+package com.treinamento.app_fidelidade.view.carrinho
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,10 +32,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.treinamento.app_fidelidade.feature.carrinho.componentes.ItemCarrinhoCard
-import com.treinamento.app_fidelidade.feature.carrinho.componentes.ResumoPontos
 import com.treinamento.app_fidelidade.ui.components.FidelidadeBottomBar
 import com.treinamento.app_fidelidade.ui.components.LoadingContent
+import com.treinamento.app_fidelidade.view.carrinho.componentes.ItemCarrinhoCard
+import com.treinamento.app_fidelidade.view.carrinho.componentes.ResumoPontos
+import com.treinamento.app_fidelidade.viewmodel.CarrinhoViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,7 +44,7 @@ fun CarrinhoScreen(
     onBack: () -> Unit,
     onContinuar: () -> Unit,
     onNavigate: (String) -> Unit,
-    viewModel: CarrinhoViewModel = viewModel(),
+    viewModel: CarrinhoViewModel = viewModel(factory = CarrinhoViewModel.Factory),
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()

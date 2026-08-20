@@ -15,6 +15,7 @@ data class MovimentacaoResponse(
     val valorPontos: BigInteger,
     val descricao: String,
     val data: String,
+    val imagemUrl:String,
     val createdAt: String? = null,
     val updatedAt: String? = null
 )

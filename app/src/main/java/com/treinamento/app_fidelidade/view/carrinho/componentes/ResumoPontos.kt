@@ -1,4 +1,4 @@
-package com.treinamento.app_fidelidade.feature.carrinho.componentes
+package com.treinamento.app_fidelidade.view.carrinho.componentes
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,7 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.treinamento.app_fidelidade.feature.carrinho.formatarPontos
+import com.treinamento.app_fidelidade.model.formatarPontos
 
 /**
  * Bloco de totais usado no rodape do carrinho e na confirmacao do resgate.

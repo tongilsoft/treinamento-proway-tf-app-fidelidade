@@ -1,5 +1,7 @@
 package com.treinamento.app_fidelidade.ui.theme
+
 import androidx.compose.ui.graphics.Color
+
 val AzulEscuro = Color(0xFF1A237E)
 val AzulPrincipal = Color(0xFF0D47A1)
 val AzulClaro = Color(0xFF1976D2)
