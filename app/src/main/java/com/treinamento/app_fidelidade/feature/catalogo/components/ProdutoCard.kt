@@ -61,7 +61,8 @@ fun ProdutoCard(
 
                 AsyncImage(
                     //https://flags.restcountries.com/v5/w640/br.png
-                    model = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcv_a1URHdVxFR8qCh_UBTyRHOB-rJDKjEOeX-3djIuQ&s=10",
+                    model = produto.imagemUrl,
+//                    model = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRcv_a1URHdVxFR8qCh_UBTyRHOB-rJDKjEOeX-3djIuQ&s=10",
 //                imageLoader = imageLoader,
                     modifier = Modifier
                         .fillMaxWidth(),

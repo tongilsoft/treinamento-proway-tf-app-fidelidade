@@ -9,7 +9,12 @@ import com.treinamento.app_fidelidade.data.repository.db.UsuarioDBRepository
 import com.treinamento.app_fidelidade.data.repository.db.UsuarioRepositoryImpl
 import com.treinamento.app_fidelidade.rotas.NavGraph
 import com.treinamento.app_fidelidade.ui.theme.FidelidadeTheme
+
 import kotlinx.coroutines.flow.first
+
+import com.treinamento.app_fidelidade.view.authentication.AuthenticationScreen
+import com.treinamento.app_fidelidade.view.fidelidade.FidelidadeApp
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,6 +30,7 @@ class MainActivity : ComponentActivity() {
                 NavGraph(navController, repository)
                 //AuthenticationScreen(rememberNavController())
 //                FidelidadeApp()
+
             }
         }
     }

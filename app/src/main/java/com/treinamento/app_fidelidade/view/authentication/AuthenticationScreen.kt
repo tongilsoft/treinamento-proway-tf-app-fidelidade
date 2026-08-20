@@ -58,13 +58,13 @@ fun AuthenticationScreen(
 //    viewModel: AuthenticationViewModel = viewModel()
 ) {
 
-    val factory = remember(repository) {
+    val authenticationViewModelFactory = remember(repository) {
         AuthenticationViewModelFactory(repository)
     }
-
     val viewModel: AuthenticationViewModel = viewModel(
-        factory = factory
+        factory = authenticationViewModelFactory
     )
+
 
     var selectedTab by remember {
         mutableIntStateOf(LOGIN_TAB)
@@ -84,19 +84,10 @@ fun AuthenticationScreen(
     val errorMessage = viewModel.errorMessage
 
 
-    /*
-     * Este efeito será executado quando o usuário autenticado for alterado.
-     *
-     * A navegação só acontece depois que o backend retorna sucesso
-     * e o ViewModel atribui response.data para usuario.
-     */
     LaunchedEffect(authenticatedUser) {
         if (authenticatedUser != null) {
             try {
                 navController.navigate(Rotas.FIDELIDADE) {
-//                    popUpTo(Rotas.AUTHENTICATION) {
-//                        inclusive = false
-//                    }
                     launchSingleTop = false
                 }
             }catch (e: Exception){
@@ -105,6 +96,7 @@ fun AuthenticationScreen(
             }
         }
     }
+
 
     /*
      * Observa as mensagens produzidas pelo ViewModel.

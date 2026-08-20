@@ -10,9 +10,17 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.treinamento.app_fidelidade.data.repository.db.UsuarioDBRepository
+import com.treinamento.app_fidelidade.data.remote.RetrofitInstance
+import com.treinamento.app_fidelidade.rotas.Rotas
+import com.treinamento.app_fidelidade.feature.catalogo.CatalogoEvent
+import com.treinamento.app_fidelidade.viewmodel.AuthenticationViewModel
 import com.treinamento.app_fidelidade.feature.catalogo.CatalogoRoute
 import com.treinamento.app_fidelidade.feature.catalogo.CatalogoViewModel
 import com.treinamento.app_fidelidade.feature.catalogo.DetalhesProdutoRoute
+import com.treinamento.app_fidelidade.feature.carrinho.CarrinhoScreen
+import com.treinamento.app_fidelidade.feature.resgate.ConfirmarResgateScreen
+import com.treinamento.app_fidelidade.feature.resgate.ListaResgatesScreen
+import com.treinamento.app_fidelidade.feature.resgate.OrigemResgate
 import com.treinamento.app_fidelidade.feature.perfil.AlterarSenhaScreen
 import com.treinamento.app_fidelidade.feature.perfil.EditarPerfilScreen
 import com.treinamento.app_fidelidade.feature.perfil.PerfilEvent
@@ -20,8 +28,12 @@ import com.treinamento.app_fidelidade.feature.perfil.PerfilRoute
 import com.treinamento.app_fidelidade.feature.perfil.PerfilViewModel
 import com.treinamento.app_fidelidade.repository.*
 import com.treinamento.app_fidelidade.ui.components.util.rememberNetworkConnection
+import com.treinamento.app_fidelidade.viewmodel.AuthenticationViewModelFactory
 
-private enum class AppRoute { CATALOGO, DETALHES, PERFIL, EDITAR_PERFIL, ALTERAR_SENHA }
+private enum class AppRoute {
+    CATALOGO, DETALHES, PERFIL, EDITAR_PERFIL, ALTERAR_SENHA,
+    CARRINHO, CONFIRMAR_RESGATE, LISTA_RESGATES
+}
 
 @Composable
 fun FidelidadeApp(
@@ -29,13 +41,30 @@ fun FidelidadeApp(
     repository: UsuarioDBRepository
 ) {
 
+    val produtoRepository = remember { RemoteProdutoRepository(RetrofitInstance.api) }
+    val usuarioRepository = remember { RemoteUsuarioRepository(RetrofitInstance.api) }
+
+    val catalogoViewModel: CatalogoViewModel = viewModel(
+        factory = factory { CatalogoViewModel(produtoRepository, usuarioRepository) }
+    )
+    val perfilViewModel: PerfilViewModel = viewModel(
+        factory = factory { PerfilViewModel(usuarioRepository, repository) }
+    )
+
+    val authenticationViewModelFactory = remember(repository) {
+        AuthenticationViewModelFactory(repository)
+    }
+
+    val authenticationViewModel: AuthenticationViewModel = viewModel(
+        factory = authenticationViewModelFactory
+    )
+
 
     val snackbarHostState = remember {
         SnackbarHostState()
     }
 
     val isConnected = rememberNetworkConnection()
-    10
     LaunchedEffect(isConnected) {
 
         val mensagem = if (isConnected) {
@@ -49,34 +78,40 @@ fun FidelidadeApp(
     }
 
 
-    val produtoRepository = remember { InMemoryProdutoRepository() }
-    val usuarioRepository = remember { InMemoryUsuarioRepository() }
+    // Obter AuthenticationViewModel compartilhado para poder limpar estado no logout
+//    val authenticationViewModel: AuthenticationViewModel = viewModel(
+//        factory = AuthenticationViewModelFactory(
+//            repository = repository
+//        )
+//    )
 
-    val catalogoViewModel: CatalogoViewModel = viewModel(
-        factory = factory { CatalogoViewModel(produtoRepository, usuarioRepository) }
-    )
-    val perfilViewModel: PerfilViewModel = viewModel(
-        factory = factory { PerfilViewModel(usuarioRepository, repository) }
-    )
+    LaunchedEffect(Unit) {
+        catalogoViewModel.onEvent(CatalogoEvent.Atualizar)
+        perfilViewModel.onEvent(PerfilEvent.Atualizar)
+    }
 
     val catalogo by catalogoViewModel.uiState.collectAsStateWithLifecycle()
     val perfil by perfilViewModel.uiState.collectAsStateWithLifecycle()
 
     var currentRoute by rememberSaveable { mutableStateOf(AppRoute.CATALOGO) }
 
+    // De onde a confirmação foi aberta
+    var origemResgate by remember { mutableStateOf<OrigemResgate>(OrigemResgate.Carrinho) }
+
     fun navigate(route: String) {
         when (route) {
             "home" -> currentRoute = AppRoute.CATALOGO
             "catalogo" -> currentRoute = AppRoute.CATALOGO
             "perfil" -> currentRoute = AppRoute.PERFIL
-            "carrinho" -> { /* Destino externo */ }
+            "carrinho" -> currentRoute = AppRoute.CARRINHO
+            "resgates" -> currentRoute = AppRoute.LISTA_RESGATES
         }
     }
 
     when (currentRoute) {
         AppRoute.CATALOGO -> CatalogoRoute(
             viewModel = catalogoViewModel,
-            onBack = { /* Home ou fechar app */ },
+            onBack = { },
             onNavigateToDetails = {
                 currentRoute = AppRoute.DETALHES
             },
@@ -95,9 +130,21 @@ fun FidelidadeApp(
             viewModel = perfilViewModel,
             onNavigateToEditarPerfil = { currentRoute = AppRoute.EDITAR_PERFIL },
             onNavigateToAlterarSenha = { currentRoute = AppRoute.ALTERAR_SENHA },
+//<<<<<<< HEAD
             onNavigate = ::navigate,
             navController = navController
         )
+//=======
+//            onSairClick = {
+//                // Limpar estado de autenticação e voltar para a tela de autenticação
+//                authViewModel.clearAuthenticationState()
+//                navController.navigate(Rotas.AUTHENTICATION) {
+//                    popUpTo(Rotas.FIDELIDADE) { inclusive = false }
+//                }
+//            },
+//            onNavigate = ::navigate
+//>>>>>>> main
+//        )
 
         AppRoute.EDITAR_PERFIL -> EditarPerfilScreen(
             state = perfil,
@@ -117,6 +164,31 @@ fun FidelidadeApp(
                     onSuccess = { currentRoute = AppRoute.PERFIL }
                 )
             }
+        )
+
+        AppRoute.CARRINHO -> CarrinhoScreen(
+            onBack = { currentRoute = AppRoute.CATALOGO },
+            onContinuar = {
+                origemResgate = OrigemResgate.Carrinho
+                currentRoute = AppRoute.CONFIRMAR_RESGATE
+            },
+            onNavigate = ::navigate
+        )
+
+        AppRoute.CONFIRMAR_RESGATE -> ConfirmarResgateScreen(
+            origem = origemResgate,
+            onBack = { currentRoute = AppRoute.CARRINHO },
+            onResgateFinalizado = { currentRoute = AppRoute.LISTA_RESGATES },
+            onNavigate = ::navigate
+        )
+
+        AppRoute.LISTA_RESGATES -> ListaResgatesScreen(
+            onBack = { currentRoute = AppRoute.PERFIL },
+            onConfirmarPendente = { id ->
+                origemResgate = OrigemResgate.Pendente(id)
+                currentRoute = AppRoute.CONFIRMAR_RESGATE
+            },
+            onNavigate = ::navigate
         )
     }
 }

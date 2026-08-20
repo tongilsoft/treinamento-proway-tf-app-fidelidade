@@ -41,12 +41,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
 import androidx.navigation.NavHostController
 import com.treinamento.app_fidelidade.data.repository.db.UsuarioDBRepository
 import com.treinamento.app_fidelidade.rotas.Rotas
 import com.treinamento.app_fidelidade.ui.components.util.rememberNetworkConnection
 import kotlinx.coroutines.flow.first
 import java.lang.Thread.sleep
+import androidx.navigation.NavController
+import kotlinx.coroutines.delay
+
 
 @Composable
 fun LoyaltySplashScreen(
@@ -103,6 +107,7 @@ fun LoyaltySplashScreen(
             message = mensagem
         )
     }
+
 
 
     // Animação de pulso para o ícone

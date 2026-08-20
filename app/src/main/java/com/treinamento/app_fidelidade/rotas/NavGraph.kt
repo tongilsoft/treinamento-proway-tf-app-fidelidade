@@ -20,5 +20,6 @@ fun NavGraph(navController: NavHostController,repository: UsuarioDBRepository){
         composable(Rotas.SPLASH){ LoyaltySplashScreen(navController = navController, repository = repository) }
         composable(Rotas.AUTHENTICATION){ AuthenticationScreen(navController = navController, repository = repository) }
         composable(Rotas.FIDELIDADE){ FidelidadeApp(navController = navController, repository = repository) }
+
     }
 }

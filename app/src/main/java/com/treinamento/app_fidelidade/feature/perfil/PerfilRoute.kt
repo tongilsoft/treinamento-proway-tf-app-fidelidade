@@ -13,6 +13,7 @@ fun PerfilRoute(
     viewModel: PerfilViewModel,
     onNavigateToEditarPerfil: () -> Unit,
     onNavigateToAlterarSenha: () -> Unit,
+//    onSairClick: () -> Unit,
     onNavigate: (String) -> Unit,
     modifier: Modifier = Modifier,
     navController: NavController
