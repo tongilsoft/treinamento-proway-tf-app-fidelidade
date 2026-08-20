@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -17,17 +16,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.treinamento.app_fidelidade.R
+import com.treinamento.app_fidelidade.data.remote.RetrofitInstance
 import com.treinamento.app_fidelidade.ui.theme.*
+import java.math.BigInteger
 
 data class Transaction(
     val id: String,
@@ -54,15 +52,35 @@ data class Partner(
 @Preview(showBackground = true)
 @Composable
 fun HomeScreen() {
-    val userName = "Fulano"
-    val pointsBalance = "13.123.678"
+    val apiInstance = RetrofitInstance.api
+
+    var loadingMeusDados by remember { mutableStateOf(false) }
+    var userName by remember { mutableStateOf("") }
+    var pointsBalance by remember { mutableStateOf("0") }
+    var transactions by remember { mutableStateOf(emptyList<Transaction>()) }
     
-    val transactions = listOf(
-        Transaction("1", -300, "Loja A", "06/05/2025", false),
-        Transaction("2", 150, "Resgate - Produto X", "05/05/2025", true),
-        Transaction("3", 500, "Parceiro B", "04/05/2025", true),
-        Transaction("4", 200, "Compra - Loja C", "03/05/2025", true)
-    )
+    LaunchedEffect(Unit) {
+        try {
+            val response = apiInstance.getMeusDados()
+            if (response.success && response.data != null) {
+                val data = response.data
+                userName = data.name ?: ""
+                pointsBalance = data.pontosSaldo?.toString() ?: "0"
+                transactions = data.movimentacoes?.map {
+                    Transaction(
+                        id = it.id.toString(),
+                        points = it.valorPontos?.toInt() ?: 0,
+                        place = it.descricao ?: "",
+                        date = it.data ?: "",
+                        isEarning = it.tipo == "credito"
+                    )
+                } ?: emptyList()
+                loadingMeusDados = true
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
     
     val offers = listOf(
         Offer("1", "10% OFF", "Em parceiros selecionados", NegativeRed),
@@ -88,7 +106,7 @@ fun HomeScreen() {
             item { Spacer(modifier = Modifier.height(16.dp)) }
             
             // Header
-            item { HomeHeader(userName) }
+            item { HomeHeader(userName, loadingMeusDados) }
             
             // Points Card
             item { PointsCard(pointsBalance) }
@@ -136,14 +154,14 @@ fun HomeScreen() {
 }
 
 @Composable
-fun HomeHeader(userName: String) {
+fun HomeHeader(userName: String, loadingMeusDados: Boolean) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = stringResource(R.string.hello_user, userName),
+            text = if (loadingMeusDados) stringResource(R.string.hello_user, userName) else "Carregando...",
             color = TextColor,
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
