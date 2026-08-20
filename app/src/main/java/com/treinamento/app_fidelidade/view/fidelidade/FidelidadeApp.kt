@@ -16,6 +16,7 @@ import com.treinamento.app_fidelidade.feature.catalogo.CatalogoEvent
 import com.treinamento.app_fidelidade.feature.catalogo.CatalogoRoute
 import com.treinamento.app_fidelidade.feature.catalogo.CatalogoViewModel
 import com.treinamento.app_fidelidade.feature.catalogo.DetalhesProdutoRoute
+import com.treinamento.app_fidelidade.feature.home.HomeRoute
 import com.treinamento.app_fidelidade.feature.perfil.AlterarSenhaScreen
 import com.treinamento.app_fidelidade.feature.perfil.EditarPerfilScreen
 import com.treinamento.app_fidelidade.feature.perfil.PerfilEvent
@@ -27,12 +28,13 @@ import com.treinamento.app_fidelidade.ui.components.util.rememberNetworkConnecti
 import com.treinamento.app_fidelidade.viewmodel.AuthenticationViewModelFactory
 
 import com.treinamento.app_fidelidade.view.carrinho.CarrinhoScreen
+import com.treinamento.app_fidelidade.view.home.HomeScreen
 import com.treinamento.app_fidelidade.view.resgate.ConfirmarResgateScreen
 import com.treinamento.app_fidelidade.view.resgate.ListaResgatesScreen
 import com.treinamento.app_fidelidade.viewmodel.AuthenticationViewModel
 
 private enum class AppRoute {
-    CATALOGO, DETALHES, PERFIL, EDITAR_PERFIL, ALTERAR_SENHA,
+    HOME, CATALOGO, DETALHES, PERFIL, EDITAR_PERFIL, ALTERAR_SENHA,
     CARRINHO, CONFIRMAR_RESGATE, LISTA_RESGATES
 }
 
@@ -101,7 +103,7 @@ fun FidelidadeApp(
 
     fun navigate(route: String) {
         when (route) {
-            "home" -> currentRoute = AppRoute.CATALOGO
+            "home" -> currentRoute = AppRoute.HOME
             "catalogo" -> currentRoute = AppRoute.CATALOGO
             "perfil" -> currentRoute = AppRoute.PERFIL
             "carrinho" -> currentRoute = AppRoute.CARRINHO
@@ -110,6 +112,14 @@ fun FidelidadeApp(
     }
 
     when (currentRoute) {
+        AppRoute.HOME -> HomeRoute(
+            viewModel = catalogoViewModel,
+            onBack = { },
+            onNavigateToDetails = {},
+//            onNavigateToCart = { navigate("carrinho") },
+            onNavigate = ::navigate,
+            modifier = Modifier
+        )
         AppRoute.CATALOGO -> CatalogoRoute(
             viewModel = catalogoViewModel,
             onBack = { },
