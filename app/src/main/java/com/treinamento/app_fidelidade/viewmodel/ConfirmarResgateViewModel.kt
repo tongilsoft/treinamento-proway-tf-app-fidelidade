@@ -120,7 +120,10 @@ class ConfirmarResgateViewModel(
 
             when (val resultado = resgateRepository.criar(state.itens)) {
                 is ResultadoApi.Sucesso -> {
-                    saldoRepository.definir(resultado.dados.pontosSaldoAtual.toLong())
+                    // Alguns backends nao devolvem o saldo novo no resgate; nesse caso
+                    // buscamos em /pontos em vez de deixar a tela com valor velho.
+                    val saldoNovo = resultado.dados.pontosSaldoAtual
+                    if (saldoNovo != null) saldoRepository.definir(saldoNovo) else saldoRepository.atualizar()
                     registrarConclusao()
                     _uiState.update { it.copy(enviando = false) }
                     onFinalizado(StatusResgate.CONCLUIDO)

@@ -52,9 +52,10 @@ data class Resgate(
  * e mudar o contrato da API nao obriga a mexer no ViewModel.
  */
 data class ResgateConcluido(
-    val idResgate: Long,
-    val pontosUtilizados: Long,
-    val pontosSaldoAtual: Long
+    val idResgate: Long?,
+    val pontosUtilizados: Long?,
+    /** Null quando o servidor nao devolve o saldo novo: nesse caso o app rebusca em /pontos. */
+    val pontosSaldoAtual: Long?
 )
 
 /** De onde a tela de confirmacao foi aberta. */

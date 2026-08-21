@@ -3,21 +3,25 @@ package com.treinamento.app_fidelidade.data.remote.dto.response
 import java.math.BigInteger
 
 /**
- * Resgate criado por POST /api/resgate. "status" chega como "pendente".
- * O resgate pode ter um ou varios itens; pontosUtilizados e a soma de valorPontosTotal de todos eles.
+ * Resgate criado por POST /api/resgate.
+ *
+ * Tudo aqui e nulavel de proposito. O Gson cria o objeto por reflexao e nao respeita
+ * o nao-nulavel do Kotlin: se o servidor omitir um campo, o valor chega null mesmo
+ * declarado como obrigatorio, e o app estoura so quando alguem for usar. Como o
+ * contrato do backend ainda esta mudando, o tipo reflete o que o JSON pode trazer.
  */
 data class Resgate(
-    val idResgate: BigInteger,
-    val idUsuario: BigInteger,
+    val idResgate: BigInteger? = null,
+    val idUsuario: BigInteger? = null,
     // quantidade de linhas do resgate (nao a soma das quantidades)
-    val quantidadeItens: BigInteger,
-    val itens: List<ItemResgate>,
-    val pontosUtilizados: BigInteger,
-    val pontosSaldoAnterior: BigInteger,
-    val pontosSaldoAtual: BigInteger,
-    val status: String,
-    val dataCriacao: String,
-    val dataConfirmacao: String?,
-    val createdAt: String,
-    val updatedAt: String
+    val quantidadeItens: BigInteger? = null,
+    val itens: List<ItemResgate>? = null,
+    val pontosUtilizados: BigInteger? = null,
+    val pontosSaldoAnterior: BigInteger? = null,
+    val pontosSaldoAtual: BigInteger? = null,
+    val status: String? = null,
+    val dataCriacao: String? = null,
+    val dataConfirmacao: String? = null,
+    val createdAt: String? = null,
+    val updatedAt: String? = null
 )

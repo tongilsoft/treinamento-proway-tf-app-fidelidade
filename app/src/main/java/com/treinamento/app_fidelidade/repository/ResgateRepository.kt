@@ -78,9 +78,9 @@ class ResgateRepositoryPadrao(
         when (val resultado = service.criarResgate(itens.paraItensRequest())) {
             is ResultadoApi.Sucesso -> ResultadoApi.Sucesso(
                 ResgateConcluido(
-                    idResgate = resultado.dados.idResgate.toLong(),
-                    pontosUtilizados = resultado.dados.pontosUtilizados.toLong(),
-                    pontosSaldoAtual = resultado.dados.pontosSaldoAtual.toLong()
+                    idResgate = resultado.dados.idResgate?.toLong(),
+                    pontosUtilizados = resultado.dados.pontosUtilizados?.toLong(),
+                    pontosSaldoAtual = resultado.dados.pontosSaldoAtual?.toLong()
                 )
             )
 
