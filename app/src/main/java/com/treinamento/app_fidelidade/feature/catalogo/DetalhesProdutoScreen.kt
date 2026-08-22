@@ -1,5 +1,6 @@
 package com.treinamento.app_fidelidade.feature.catalogo
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -32,6 +34,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.treinamento.app_fidelidade.model.Produto
 import com.treinamento.app_fidelidade.ui.components.FidelidadeBottomBar
 import java.math.BigInteger
@@ -101,12 +104,15 @@ fun DetalhesProdutoScreen(
                 shape = MaterialTheme.shapes.large
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Default.Headphones,
+
+                    AsyncImage(
+
+                        model = produto.imagemUrl,
+                        modifier = Modifier
+                            .fillMaxWidth(),
                         contentDescription = null,
-                        modifier = Modifier.size(160.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+
                 }
             }
 
