@@ -96,7 +96,7 @@ fun FidelidadeApp(
     val catalogo by catalogoViewModel.uiState.collectAsStateWithLifecycle()
     val perfil by perfilViewModel.uiState.collectAsStateWithLifecycle()
 
-    var currentRoute by rememberSaveable { mutableStateOf(AppRoute.CATALOGO) }
+    var currentRoute by rememberSaveable { mutableStateOf(AppRoute.HOME) }
 
     // De onde a confirmação foi aberta
     var origemResgate by remember { mutableStateOf<OrigemResgate>(OrigemResgate.Carrinho) }

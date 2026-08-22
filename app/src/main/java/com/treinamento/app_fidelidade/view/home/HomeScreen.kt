@@ -63,8 +63,8 @@ fun HomeScreen(
     onNavigate: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val userName = "João"
-    val pointsBalance = "13.123.678"
+    val userName = "João silva"
+    val pointsBalance = "1.800"
     
     val transactions = listOf(
         Transaction("1", -300, "Loja A", "06/05/2025", false),
