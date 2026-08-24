@@ -64,7 +64,9 @@ class RemoteUsuarioRepository(private val api: FidelidadeApi) : UsuarioRepositor
                 email = dto.email,
                 pontosSaldo = dto.pontosSaldo.toLong(),
                 qrCode = dto.qrCode,
-                token = dto.token,
+                // /meusDados nao devolve token: mantemos o que veio do login,
+                // senao perderiamos a sessao a cada atualizacao do perfil.
+                token = dto.token ?: _usuario.value.token,
                 urlImage = "",
                 createdAt = dto.createdAt,
                 updatedAt = dto.updatedAt

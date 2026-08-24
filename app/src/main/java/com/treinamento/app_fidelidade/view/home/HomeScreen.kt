@@ -27,14 +27,24 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.DateRangePicker
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDateRangePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -113,8 +123,24 @@ fun HomeScreen(
     extrato: List<MovimentacaoResponse>,
     filtro: FiltroExtrato,
     onFiltroSelecionado: (FiltroExtrato) -> Unit,
+    periodoFormatado: String?,
+    onPeriodoSelecionado: (Long?, Long?) -> Unit,
+    onLimparPeriodo: () -> Unit,
     onNavigate: (String) -> Unit
 ) {
+
+    // Estado puramente visual: se o dialogo do calendario esta aberto.
+    var mostrarCalendario by remember { mutableStateOf(false) }
+
+    if (mostrarCalendario) {
+        SeletorPeriodo(
+            onConfirmar = { inicio, fim ->
+                onPeriodoSelecionado(inicio, fim)
+                mostrarCalendario = false
+            },
+            onFechar = { mostrarCalendario = false }
+        )
+    }
 
 
     val userName = usuario?.name ?: ""
@@ -161,7 +187,15 @@ fun HomeScreen(
             item { OfflineWarning() }
             
             // Filters
-            item { StatementFilters(filtro, onFiltroSelecionado) }
+            item {
+                StatementFilters(
+                    filtro = filtro,
+                    onFiltroSelecionado = onFiltroSelecionado,
+                    periodoFormatado = periodoFormatado,
+                    onAbrirCalendario = { mostrarCalendario = true },
+                    onLimparPeriodo = onLimparPeriodo
+                )
+            }
             
             // Statement Section
             item { 
@@ -301,7 +335,10 @@ fun OfflineWarning() {
 @Composable
 fun StatementFilters(
     filtro: FiltroExtrato,
-    onFiltroSelecionado: (FiltroExtrato) -> Unit
+    onFiltroSelecionado: (FiltroExtrato) -> Unit,
+    periodoFormatado: String?,
+    onAbrirCalendario: () -> Unit,
+    onLimparPeriodo: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
@@ -330,22 +367,80 @@ fun StatementFilters(
                 onClick = { onFiltroSelecionado(FiltroExtrato.GASTOS) }
             )
             
+            // Fica destacado quando ha periodo escolhido, senao o usuario nao
+            // percebe que a lista esta filtrada por data.
+            val periodoAtivo = periodoFormatado != null
+
             Box(
                 modifier = Modifier
                     .size(40.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .border(1.dp, BorderColor, RoundedCornerShape(8.dp))
-                    .clickable { },
+                    .background(if (periodoAtivo) PrimaryBlue else Color.Transparent)
+                    .border(
+                        1.dp,
+                        if (periodoAtivo) PrimaryBlue else BorderColor,
+                        RoundedCornerShape(8.dp)
+                    )
+                    .clickable(onClick = onAbrirCalendario),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.CalendarMonth,
-                    contentDescription = "Calendário",
-                    tint = SecondaryTextColor,
+                    contentDescription = "Filtrar por periodo",
+                    tint = if (periodoAtivo) Color.White else SecondaryTextColor,
                     modifier = Modifier.size(20.dp)
                 )
             }
         }
+
+        if (periodoFormatado != null) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = periodoFormatado,
+                    color = SecondaryTextColor,
+                    fontSize = 13.sp
+                )
+                IconButton(onClick = onLimparPeriodo, modifier = Modifier.size(28.dp)) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Limpar periodo",
+                        tint = SecondaryTextColor,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+/** Calendario de intervalo: o usuario toca no primeiro dia e depois no ultimo. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SeletorPeriodo(
+    onConfirmar: (Long?, Long?) -> Unit,
+    onFechar: () -> Unit
+) {
+    val state = rememberDateRangePickerState()
+
+    DatePickerDialog(
+        onDismissRequest = onFechar,
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirmar(state.selectedStartDateMillis, state.selectedEndDateMillis) },
+                // Sem data escolhida nao ha o que aplicar.
+                enabled = state.selectedStartDateMillis != null
+            ) {
+                Text("Aplicar")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onFechar) { Text("Cancelar") }
+        }
+    ) {
+        DateRangePicker(
+            state = state,
+            title = { Text("Periodo do extrato", modifier = Modifier.padding(16.dp)) }
+        )
     }
 }
 

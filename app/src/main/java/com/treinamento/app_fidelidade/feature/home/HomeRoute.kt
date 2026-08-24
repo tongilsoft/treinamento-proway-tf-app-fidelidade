@@ -36,6 +36,9 @@ fun HomeRoute(
         extrato = viewModel.extratoFiltrado,
         filtro = viewModel.filtro,
         onFiltroSelecionado = viewModel::alterarFiltro,
+        periodoFormatado = viewModel.periodoFormatado,
+        onPeriodoSelecionado = viewModel::alterarPeriodo,
+        onLimparPeriodo = viewModel::limparPeriodo,
         onNavigate = onNavigate
     )
 }

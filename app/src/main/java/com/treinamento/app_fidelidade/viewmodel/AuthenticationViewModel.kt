@@ -194,7 +194,8 @@ class AuthenticationViewModel (repositoryDB: UsuarioDBRepository) : ViewModel() 
                         id = usuarioNovo.id,
                         nome = usuarioNovo.name,
                         email = usuarioNovo.email,
-                        token = usuarioNovo.token,
+                        // O login sempre devolve token; o ?: e so para o Gson nao derrubar o app.
+                        token = usuarioNovo.token ?: "",
                         pontosSaldo = usuarioNovo.pontosSaldo,
                         qrCode = usuarioNovo.qrCode,
                         createdAt = usuarioNovo.createdAt ,
