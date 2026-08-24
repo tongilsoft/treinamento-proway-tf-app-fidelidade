@@ -11,6 +11,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.treinamento.app_fidelidade.data.repository.db.UsuarioDBRepository
 import com.treinamento.app_fidelidade.data.remote.RetrofitInstance
+import com.treinamento.app_fidelidade.data.remote.service.HomeService
+import com.treinamento.app_fidelidade.data.repository.api.HomeRepository
 import com.treinamento.app_fidelidade.di.AppContainer
 import com.treinamento.app_fidelidade.feature.catalogo.CatalogoEvent
 import com.treinamento.app_fidelidade.feature.catalogo.CatalogoRoute
@@ -32,6 +34,7 @@ import com.treinamento.app_fidelidade.view.home.HomeScreen
 import com.treinamento.app_fidelidade.view.resgate.ConfirmarResgateScreen
 import com.treinamento.app_fidelidade.view.resgate.ListaResgatesScreen
 import com.treinamento.app_fidelidade.viewmodel.AuthenticationViewModel
+import com.treinamento.app_fidelidade.viewmodel.HomeViewModel
 
 private enum class AppRoute {
     HOME, CATALOGO, DETALHES, PERFIL, EDITAR_PERFIL, ALTERAR_SENHA,
@@ -54,12 +57,11 @@ fun FidelidadeApp(
         factory = factory { PerfilViewModel(usuarioRepository, repository) }
     )
 
-    val authenticationViewModelFactory = remember(repository) {
-        AuthenticationViewModelFactory(repository)
-    }
 
-    val authenticationViewModel: AuthenticationViewModel = viewModel(
-        factory = authenticationViewModelFactory
+    val homeViewModel: HomeViewModel = viewModel(
+                factory = factory {
+            HomeViewModel()
+        }
     )
 
 
@@ -81,13 +83,6 @@ fun FidelidadeApp(
     }
 
 
-    // Obter AuthenticationViewModel compartilhado para poder limpar estado no logout
-//    val authenticationViewModel: AuthenticationViewModel = viewModel(
-//        factory = AuthenticationViewModelFactory(
-//            repository = repository
-//        )
-//    )
-
     LaunchedEffect(Unit) {
         catalogoViewModel.onEvent(CatalogoEvent.Atualizar)
         perfilViewModel.onEvent(PerfilEvent.Atualizar)
@@ -96,7 +91,7 @@ fun FidelidadeApp(
     val catalogo by catalogoViewModel.uiState.collectAsStateWithLifecycle()
     val perfil by perfilViewModel.uiState.collectAsStateWithLifecycle()
 
-    var currentRoute by rememberSaveable { mutableStateOf(AppRoute.HOME) }
+    var currentRoute by rememberSaveable { mutableStateOf(AppRoute.CATALOGO) }
 
     // De onde a confirmação foi aberta
     var origemResgate by remember { mutableStateOf<OrigemResgate>(OrigemResgate.Carrinho) }
@@ -113,7 +108,7 @@ fun FidelidadeApp(
 
     when (currentRoute) {
         AppRoute.HOME -> HomeRoute(
-            viewModel = catalogoViewModel,
+            viewModel = homeViewModel,
             onBack = { },
             onNavigateToDetails = {},
 //            onNavigateToCart = { navigate("carrinho") },

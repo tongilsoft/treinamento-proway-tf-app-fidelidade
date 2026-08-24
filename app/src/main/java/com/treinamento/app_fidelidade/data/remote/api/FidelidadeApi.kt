@@ -34,12 +34,12 @@ interface FidelidadeApi {
     @POST("auth/login")
     suspend fun doLogin(
         @Body usuario: UsuarioLoginRequest
-    ): AuthResponse
+    ): AuthResponse<Usuario>
 
     @POST("auth/cadastro")
     suspend fun cadastrar(
         @Body usuario: UsuarioRegistro
-    ): AuthResponse
+    ): AuthResponse<Usuario>
 
     @GET("usuarios/meusDados")
     suspend fun getMeusDados(): ApiResponse<Usuario>
