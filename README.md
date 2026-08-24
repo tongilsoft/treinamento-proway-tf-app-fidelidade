@@ -1,7 +1,6 @@
-
 # Programa Fidelidade App
 
-Aplicativo Android para gerenciamento de programa de fidelidade, permitindo consulta de saldo de pontos, acompanhamento de extrato, envio e recebimento de pontos, resgate de recompensas e visualização de promoções de parceiros.
+Aplicativo Android para gerenciamento de programa de fidelidade, permitindo consulta de saldo de pontos, acompanhamento de extrato, resgate de recompensas e visualização de ofertas.
 
 ---
 
@@ -9,17 +8,18 @@ Aplicativo Android para gerenciamento de programa de fidelidade, permitindo cons
 
 O Programa Fidelidade App foi desenvolvido para oferecer aos clientes uma experiência simples e intuitiva na gestão dos seus pontos de fidelidade.
 
+### Identidade Visual e Componentes
+<img width="563" height="844" alt="image" src="https://github.com/user-attachments/assets/99a522f1-40d9-4f0b-a687-661ff7dad53d" />
+
 ## Principais Funcionalidades
 
 - Login e cadastro de usuários
 - Consulta de saldo de pontos
-- Visualização de promoções e ofertas
-- Consulta de extrato de movimentações
-- Resgate de recompensas
-- Transferência de pontos entre clientes
-- Consulta de parceiros participantes
-- Atualização de dados cadastrais
-- Funcionamento offline com armazenamento local
+- Visualização de ofertas e produtos
+- Consulta de extrato de movimentações (ganhos e gastos)
+- Resgate de recompensas (Carrinho de compras)
+- Atualização de dados cadastrais e senha
+- Funcionamento offline com armazenamento local (Room)
 - Exibição de QR Code para identificação do cliente
 
 ---
@@ -28,16 +28,13 @@ O Programa Fidelidade App foi desenvolvido para oferecer aos clientes uma experi
 
 Permitir que participantes do programa de fidelidade possam:
 
-- Acumular pontos em compras realizadas nos estabelecimentos parceiros;
-- Visualizar saldo e histórico de movimentações;
-- Resgatar produtos e benefícios;
-- Transferir pontos para outros usuários;
-- Receber ofertas personalizadas;
-- Consultar parceiros próximos através de geolocalização;
-- Acessar informações mesmo sem conexão com a internet.
+- Acumular pontos em compras realizadas em estabelecimentos parceiros;
+- Visualizar saldo e histórico de movimentações detalhado;
+- Resgatar produtos e benefícios utilizando o saldo acumulado;
+- Receber ofertas personalizadas na tela inicial;
+- Acessar informações da conta mesmo sem conexão com a internet através de cache local.
 
 ---
-
 # 🏛️ Arquitetura
 
 O projeto segue o padrão arquitetural **MVVM (Model-View-ViewModel)** com separação de responsabilidades, consumo de APIs REST e persistência local.
@@ -50,20 +47,33 @@ O projeto segue o padrão arquitetural **MVVM (Model-View-ViewModel)** com separ
 ## Estrutura de Camadas
 
 ### View
-Responsável pela interface com o usuário.
+Responsável pela interface com o usuário desenvolvida em Jetpack Compose.
 
 ### ViewModel
-Responsável pelas regras de apresentação, gerenciamento de estados e comunicação com o Repository.
+Responsável pelas regras de apresentação, gerenciamento de estados reativos (StateFlow) e comunicação com o Repository.
 
 ### Repository
-Centraliza o acesso aos dados locais e remotos.
+Centraliza o acesso aos dados, decidindo entre a fonte local e remota.
 
 ### Remote
-Comunicação com APIs REST através do Retrofit.
+Comunicação com APIs REST através do Retrofit e OkHttp.
 
 ### Local
-Persistência local utilizando Room Database.
+Persistência local utilizando Room Database para suporte offline.
 
+---
+
+## 🛠 Stack Tecnológica
+
+| Componente | Tecnologia |
+| :--- | :--- |
+| **Linguagem** | Kotlin 2.2.10 |
+| **Interface** | Jetpack Compose (Material 3) |
+| **Arquitetura** | MVVM |
+| **Persistência** | Room Database 2.7.1 |
+| **Rede** | Retrofit 2.11.0 + OkHttp |
+| **Imagens** | Coil 2.6.0 |
+| **Injeção de Dependência** | AppContainer (Manual DI) |
 ---
 
 # 📂 Estrutura do Projeto
@@ -74,9 +84,9 @@ Conforme a estrutura atual do projeto:
 com.treinamento.app_fidelidade
 │
 ├── data
-│   ├── local
+│   ├── local          # Banco de Dados Room
 │   │
-│   ├── remote
+│   ├── remote         # Retrofit Services e DTOs
 │   │   ├── api
 │   │   │   └── FidelidadeApi.kt
 │   │   │
@@ -86,17 +96,17 @@ com.treinamento.app_fidelidade
 │   │   │
 │   │   └── RetrofitInstance.kt
 │   │
-│   └── repository
+│   └── repository     # Implementações dos repositórios
 │
-├── model
+├── model              # Modelos de domínio
 │
-├── ui.theme
+├── feature            # Funcionalidades organizadas por módulos (Catalogo, Perfil)
 │
-├── view
+├── view               # Telas e componentes Compose
 │
-├── viewmodel
+├── viewmodel          # ViewModels da aplicação
 │
-└── MainActivity.kt
+└── MainActivity.kt    # Ponto de entrada e NavHost
 ```
 
 ---
@@ -112,6 +122,9 @@ com.treinamento.app_fidelidade
 ---
 
 # 📱 Telas do Aplicativo
+
+### Fluxo de Onboarding e Perfil
+<img width="1447" height="678" alt="image" src="https://github.com/user-attachments/assets/46e07a3b-b05b-4b49-9edb-b5cd7e47b8e2" />
 
 ## Splash Screen
 
@@ -135,9 +148,9 @@ Permite autenticação do usuário.
 
 ### Funcionalidades
 
-- Login persistente;
-- Recuperação da última sessão;
-- Funcionamento offline para visualização de dados locais.
+- Login persistente com armazenamento de token;
+- Recuperação automática de sessão;
+- Funcionamento offline para visualização de dados cacheados.
 
 ---
 
@@ -150,109 +163,82 @@ Permite criar uma nova conta.
 - Nome
 - E-mail
 - Senha
-- QR Code
+- Confirmação de Senha
 
 ---
 
 ## Home
 
-Tela principal da aplicação.
+Tela principal da aplicação com visão geral da conta.
+
+<img width="1511" height="752" alt="image" src="https://github.com/user-attachments/assets/7afb6a14-c194-4c1b-bbd4-ee5422851495" />
 
 ### Funcionalidades
 
-- Visualização de saldo de pontos;
-- Promoções em destaque;
-- Últimas movimentações;
-- Acesso rápido às funcionalidades principais.
+- Visualização do saldo atual de pontos;
+- Banner de ofertas e novidades;
+- Atalhos rápidos para funcionalidades;
+- Resumo das últimas movimentações.
 
 ### Modo Offline
 
-Caso não exista conexão com a internet será exibida a mensagem:
-
+Exibe um banner informativo caso não exista conexão:
 ```text
 Os dados podem estar desatualizados devido estar sem internet.
 ```
-
-Além disso, serão exibidos os últimos dados sincronizados.
+Os dados exibidos são provenientes do último sincronismo bem-sucedido.
 
 ---
 
 ## Extrato de Pontos
 
-Exibe movimentações realizadas pelo usuário:
+Exibe todas as movimentações (créditos e débitos) do usuário.
 
-- Pontos acumulados;
-- Pontos utilizados;
-- Data da movimentação;
-- Estabelecimento responsável.
+### Filtros Disponíveis
 
-### Filtros
-
-- Período;
-- Parceiro;
-- Tipo de movimentação.
-
----
-
-## Parceiros
-
-Lista de estabelecimentos participantes.
-
-### Recursos
-
-- Pesquisa por nome;
-- Filtros;
-- Geolocalização;
-- Parceiros próximos.
+- **Por Tipo**: Todos, Ganhos (Créditos) ou Gastos (Débitos);
+- **Por Período**: Todo o período, Últimos 7 dias ou Últimos 30 dias.
 
 ---
 
 ## Catálogo de Recompensas
 
-Lista de produtos e benefícios disponíveis para resgate.
+Lista completa de produtos disponíveis para resgate.
 
-### Recursos
+<img width="1063" height="680" alt="image" src="https://github.com/user-attachments/assets/29ed29b3-eb45-435d-b0f0-112af292a147" />
 
-- Filtro por relevância;
-- Exibição dos pontos necessários;
-- Exibição dos pontos faltantes;
-- Carrinho de resgates.
+### Recursos e Filtros
 
-### Exemplo
-
-```text
-Saldo Atual: 500 pontos
-
-Produto:
-Smartwatch - 700 pontos
-
-Faltam:
-200 pontos
-```
+- **Busca**: Pesquisa textual por nome do produto;
+- **Categorias**: Filtragem por departamentos (ex: Medicamentos, Bem-estar, Higiene);
+- **Ordenação**: Menor pontuação, Maior pontuação ou Ordem Alfabética;
+- **Indicadores**: Exibição de pontos necessários e quanto falta para o resgate.
 
 ---
 
-## Resgate
+## Resgate (Carrinho)
 
-Responsável pela confirmação dos produtos selecionados.
+Gerenciamento dos itens selecionados para troca de pontos.
 
 ### Funcionalidades
 
-- Carrinho de confirmação;
-- Consumo de pontos;
-- Registro no histórico;
-- Integração futura com backend.
+- Adição de múltiplos produtos com controle de quantidade;
+- Cálculo em tempo real do total de pontos e saldo restante;
+- Validação de saldo insuficiente antes da finalização;
+- Confirmação do resgate com atualização automática do saldo.
 
 ---
 
 ## Perfil
 
-Permite visualizar e atualizar:
+Área de gerenciamento da conta.
 
-- Nome;
-- E-mail;
-- Senha;
-- QR Code.
+### Funcionalidades
+
+- Visualização de dados pessoais;
+- Edição de Nome e E-mail;
+- Alteração de Senha;
+- Exibição de QR Code exclusivo para identificação rápida em parceiros.
 
 ---
 
@@ -265,36 +251,23 @@ Permite visualizar e atualizar:
   "id": 1,
   "name": "Cliente",
   "email": "cliente@email.com",
-  "password": "***",
   "pontosSaldo": 1000,
   "qrCode": "ABC123",
-  "createdAt": "",
-  "updatedAt": ""
+  "createdAt": "2024-01-01T10:00:00",
+  "updatedAt": "2024-01-01T10:00:00"
 }
 ```
 
-## PontosBonificados
-
-```json
-{
-  "idUsuario": 1,
-  "idEstabelecimento": 1,
-  "pontos": 200,
-  "createdAt": "",
-  "updatedAt": ""
-}
-```
-
-## HistoricoPontos
+## Movimentacao (Extrato)
 
 ```json
 {
   "id": 1,
-  "idEstabelecimento": 10,
-  "pontoGasto": 100,
-  "idProduto": 30,
-  "createdAt": "",
-  "updatedAt": ""
+  "tipo": "debito",
+  "valorPontos": 500,
+  "descricao": "Resgate de Produto",
+  "data": "2024-08-24",
+  "idProduto": 10
 }
 ```
 
@@ -306,151 +279,64 @@ Permite visualizar e atualizar:
   "name": "Smartwatch",
   "descricao": "Relógio Inteligente",
   "valorPontos": 2000,
+  "imagemUrl": "http://...",
   "idCategoria": 1
 }
 ```
 
-## Categoria
+---
 
-```json
-{
-  "id": 1,
-  "name": "Eletrônicos",
-  "descricao": "Produtos eletrônicos"
-}
-```
+# 🚀 Instalação e Execução
 
-## Estabelecimento
+Siga os passos abaixo para configurar o ambiente e rodar a aplicação.
 
-```json
-{
-  "id": 1,
-  "name": "Loja Exemplo",
-  "endereco": "Rua Exemplo",
-  "latitude": -12.9714,
-  "longitude": -38.5014
-}
-```
+### 1. Configuração do Backend (Mockoon)
+O aplicativo consome uma API REST simulada.
+1.  Instale o **Mockoon**.
+2.  Importe o arquivo `fidelidade-api.json` (localizado na pasta `backend`) para o Mockoon.
+3.  Inicie o ambiente e certifique-se de que o servidor está rodando na porta **3000**.
+
+### 2. Ajuste de IP (Retrofit)
+Para que o app se comunique com o servidor local:
+1.  Localize o arquivo `RetrofitInstance.kt` no projeto.
+2.  Configure a constante `BASE_URL`:
+    *   **Emulador Android:** Use `http://10.0.2.2:3000/api/`
+    *   **Dispositivo Físico:** Use o IP do seu computador na rede Wi-Fi (ex: `http://192.168.1.5:3000/api/`).
+
+### 3. Execução no Android Studio
+1.  Clone o projeto e abra no Android Studio.
+2.  Sincronize o Gradle (botão de elefante).
+3.  Clique em **Run 'app'** para instalar no dispositivo ou emulador.
 
 ---
 
 # ⚙️ Tecnologias Utilizadas
 
-## Linguagem
-
-- Kotlin
-
-## Interface
-
-- Jetpack Compose
-- Material Design 3
-- Material Icons Extended
-- Compose Animation
-
-## Arquitetura
-
-- MVVM (Model View ViewModel)
-
-## Comunicação com APIs
-
-- Retrofit 2.11.0
-- Gson Converter
-- OkHttp
-- Logging Interceptor
-
-## Processamento Assíncrono
-
-- Kotlin Coroutines
-
-## Persistência
-
-- Room Database
-
-## Navegação
-
-- Navigation Component
-
-## Imagens
-
-- Coil
-
-## Outros
-
-- Android Splash Screen API
-- Mockoon (Servidor Mock)
+- **Kotlin**: Linguagem oficial para desenvolvimento Android.
+- **Jetpack Compose**: UI declarativa moderna.
+- **Material Design 3**: Padrão visual e componentes.
+- **MVVM**: Arquitetura robusta e testável.
+- **Retrofit & OkHttp**: Consumo de APIs REST com interceptadores de log.
+- **Room Database**: Banco de dados local para cache e suporte offline.
+- **Coroutines & Flow**: Processamento assíncrono e fluxos de dados reativos.
+- **Navigation Component**: Navegação estruturada entre telas.
+- **Coil**: Carregamento eficiente de imagens via rede.
 
 ---
 
 # 📋 Requisitos do Projeto
 
-Com base no arquivo `build.gradle.kts`.
-
-## Ambiente
-
-- Android Studio Hedgehog ou superior
-- JDK 11
-- Gradle 8+
-- Kotlin
-- Android SDK
-
-## SDKs
-
-```text
-Compile SDK: 37
-Target SDK : 36
-Min SDK    : 24
-```
-
----
-
-# 🔌 API Mock
-
-O backend utilizado durante o desenvolvimento é disponibilizado através do Mockoon.
-
-## Servidor
-
-```text
-Mockoon
-```
-
-## Endpoints
-
-### Usuário
-
-```http
-POST /login
-POST /cadastro
-GET  /meusPontos
-GET  /meusPontosGastosFiltro
-GET  /extratoUltimos10
-GET  /buscarOfertas
-GET  /parceirosApp
-GET  /meusDados
-```
-
-### Produtos
-
-```http
-GET /listagemFiltro
-```
-
-### Pontuação
-
-```http
-POST /consumirPontosUsuarios
-POST /bonificarPontosUsuario
-```
+- **Android Studio**: Ladybug (ou superior)
+- **JDK**: 17
+- **Gradle**: 8.x
+- **Min SDK**: 26 (Android 8.0)
+- **Target SDK**: 35
 
 ---
 
 # 💾 Persistência Local
 
-O projeto utiliza Room Database para armazenamento local de:
-
-- Dados do usuário;
-- Último login;
-- Extrato sincronizado;
-- Produtos visualizados;
-- Resgates pendentes;
-- Cache de promoções.
-
+O projeto utiliza o **Room** para persistir:
+- Dados básicos do usuário logado;
+- Estado do carrinho de compras (permite continuar compras após fechar o app);
+- Cache do catálogo e extrato para acesso imediato em modo offline.
