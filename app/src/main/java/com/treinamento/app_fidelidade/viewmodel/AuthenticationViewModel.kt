@@ -132,9 +132,27 @@ class AuthenticationViewModel (repositoryDB: UsuarioDBRepository) : ViewModel() 
                 val response = repository.doRegister(usuarioRegister)
 
                 if (response.success && response.data != null) {
-//                    usuario = response.data
-                    salvarSQLite(response.data, repositoryDB)
+                    /*
+                     * O cadastro apenas cria o usuario no backend, ele nao autentica.
+                     * Sem este login o servidor continuaria respondendo como o usuario
+                     * anterior, e saldo, extrato e resgates viriam da conta errada.
+                     *
+                     * So marcamos o usuario como autenticado depois que o login volta:
+                     * e ele quem traz o token e abre a sessao.
+                     */
+                    val login = repository.doLogin(
+                        UsuarioLogin(
+                            email = usuarioRegister.email,
+                            senha = usuarioRegister.password
+                        )
+                    )
 
+                    if (login.success && login.data != null) {
+                        salvarSQLite(login.data, repositoryDB)
+                    } else {
+                        errorMessage =
+                            "Cadastro realizado, mas nao foi possivel entrar. Faca login."
+                    }
                 } else {
                     errorMessage = response.message
                         ?.takeIf { message ->

@@ -44,6 +44,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.treinamento.app_fidelidade.R
+import com.treinamento.app_fidelidade.viewmodel.FiltroExtrato
+import com.treinamento.app_fidelidade.data.remote.dto.response.MovimentacaoResponse
 import com.treinamento.app_fidelidade.data.remote.dto.response.Usuario
 import com.treinamento.app_fidelidade.ui.components.FidelidadeBottomBar
 import com.treinamento.app_fidelidade.ui.theme.BackgroundColor
@@ -65,6 +67,31 @@ data class Transaction(
     val isEarning: Boolean
 )
 
+/**
+ * Converte uma movimentacao da API no item que a Home desenha.
+ *
+ * Debito vira valor negativo, para o card mostrar "-300 pontos" sem a tela
+ * precisar saber o que e "tipo".
+ */
+private fun MovimentacaoResponse.paraTransaction(): Transaction {
+    val ehCredito = tipo.equals("credito", ignoreCase = true)
+    val valor = valorPontos.toInt()
+
+    return Transaction(
+        id = id.toString(),
+        points = if (ehCredito) valor else -valor,
+        place = descricao,
+        date = formatarData(data),
+        isEarning = ehCredito
+    )
+}
+
+/** A API manda "2026-08-01"; a tela mostra "01/08/2026". */
+private fun formatarData(dataApi: String): String {
+    val partes = dataApi.take(10).split("-")
+    return if (partes.size == 3) "${partes[2]}/${partes[1]}/${partes[0]}" else dataApi
+}
+
 data class Offer(
     val id: String,
     val title: String,
@@ -83,19 +110,18 @@ data class Partner(
 @Composable
 fun HomeScreen(
     usuario: Usuario?,
+    extrato: List<MovimentacaoResponse>,
+    filtro: FiltroExtrato,
+    onFiltroSelecionado: (FiltroExtrato) -> Unit,
     onNavigate: (String) -> Unit
 ) {
 
 
     val userName = usuario?.name ?: ""
     val pointsBalance = usuario?.pontosSaldo?.toString() ?: "0"
-    
-    val transactions = listOf(
-        Transaction("1", -300, "Loja A", "06/05/2025", false),
-        Transaction("2", 150, "Resgate - Produto X", "05/05/2025", true),
-        Transaction("3", 500, "Parceiro B", "04/05/2025", true),
-        Transaction("4", 200, "Compra - Loja C", "03/05/2025", true)
-    )
+
+    // O extrato inteiro entra aqui: credito, debito e transferencia.
+    val transactions = extrato.map { it.paraTransaction() }
     
     val offers = listOf(
         Offer("1", "10% OFF", "Em parceiros selecionados", NegativeRed),
@@ -135,7 +161,7 @@ fun HomeScreen(
             item { OfflineWarning() }
             
             // Filters
-            item { StatementFilters() }
+            item { StatementFilters(filtro, onFiltroSelecionado) }
             
             // Statement Section
             item { 
@@ -144,8 +170,12 @@ fun HomeScreen(
                     onViewAllClick = {}
                 )
             }
-            items(transactions) { transaction ->
-                TransactionItem(transaction)
+            if (transactions.isEmpty()) {
+                item { ExtratoVazio(filtro) }
+            } else {
+                items(transactions) { transaction ->
+                    TransactionItem(transaction)
+                }
             }
             
             // Offers Section
@@ -269,7 +299,10 @@ fun OfflineWarning() {
 }
 
 @Composable
-fun StatementFilters() {
+fun StatementFilters(
+    filtro: FiltroExtrato,
+    onFiltroSelecionado: (FiltroExtrato) -> Unit
+) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(
             text = stringResource(R.string.statement_filter),
@@ -281,9 +314,21 @@ fun StatementFilters() {
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FilterChip(stringResource(R.string.filter_all), true)
-            FilterChip(stringResource(R.string.filter_earnings), false)
-            FilterChip(stringResource(R.string.filter_spendings), false)
+            FilterChip(
+                text = stringResource(R.string.filter_all),
+                isSelected = filtro == FiltroExtrato.TODOS,
+                onClick = { onFiltroSelecionado(FiltroExtrato.TODOS) }
+            )
+            FilterChip(
+                text = stringResource(R.string.filter_earnings),
+                isSelected = filtro == FiltroExtrato.GANHOS,
+                onClick = { onFiltroSelecionado(FiltroExtrato.GANHOS) }
+            )
+            FilterChip(
+                text = stringResource(R.string.filter_spendings),
+                isSelected = filtro == FiltroExtrato.GASTOS,
+                onClick = { onFiltroSelecionado(FiltroExtrato.GASTOS) }
+            )
             
             Box(
                 modifier = Modifier
@@ -305,7 +350,7 @@ fun StatementFilters() {
 }
 
 @Composable
-fun FilterChip(text: String, isSelected: Boolean) {
+fun FilterChip(text: String, isSelected: Boolean, onClick: () -> Unit) {
     val backgroundColor = if (isSelected) PrimaryBlue else FieldColor
     val textColor = if (isSelected) Color.White else SecondaryTextColor
     val borderStroke = if (isSelected) null else BorderStroke(1.dp, BorderColor)
@@ -314,7 +359,7 @@ fun FilterChip(text: String, isSelected: Boolean) {
         color = backgroundColor,
         shape = RoundedCornerShape(8.dp),
         border = borderStroke,
-        modifier = Modifier.clickable { }
+        modifier = Modifier.clickable(onClick = onClick)
     ) {
         Text(
             text = text,
@@ -323,6 +368,21 @@ fun FilterChip(text: String, isSelected: Boolean) {
             fontSize = 14.sp
         )
     }
+}
+
+/** Sem esta mensagem, filtrar uma aba sem movimentacao deixaria a secao muda. */
+@Composable
+fun ExtratoVazio(filtro: FiltroExtrato) {
+    Text(
+        text = when (filtro) {
+            FiltroExtrato.TODOS -> "Voce ainda nao tem movimentacoes."
+            FiltroExtrato.GANHOS -> "Nenhum ganho de pontos ate agora."
+            FiltroExtrato.GASTOS -> "Nenhum gasto de pontos ate agora."
+        },
+        color = SecondaryTextColor,
+        fontSize = 14.sp,
+        modifier = Modifier.padding(vertical = 8.dp)
+    )
 }
 
 @Composable

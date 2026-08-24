@@ -25,12 +25,17 @@ fun HomeRoute(
 
     val usuario = viewModel.usuario
 
+    // carregarHome() traz nome, saldo e extrato numa passada so.
     LaunchedEffect(Unit) {
-        viewModel.meusDados()
+        viewModel.carregarHome()
     }
 
     HomeScreen(
         usuario = usuario,
+        // A tela recebe a lista ja filtrada; quem decide o filtro e o ViewModel.
+        extrato = viewModel.extratoFiltrado,
+        filtro = viewModel.filtro,
+        onFiltroSelecionado = viewModel::alterarFiltro,
         onNavigate = onNavigate
     )
 }
